@@ -20,6 +20,8 @@ endfunction
 function! s:InitializeVariables()
     call s:InitVariable("g:VtrPercentage", 20)
     call s:InitVariable("g:VtrOrientation", "v")
+    call s:InitVariable("g:VtrInitialCommand", "")
+    call s:InitVariable("g:VtrClearBeforeSend", 1)
 endfunction
 call s:InitializeVariables()
 
@@ -29,6 +31,11 @@ function! s:OpenRunnerPane()
     call s:SendTmuxCommand(cmd)
     let s:runner_pane = s:ActiveTmuxPaneNumber()
     call s:FocusVimPane()
+    if g:VtrInitialCommand != ""
+        call s:SendKeys(g:VtrInitialCommand)
+        call s:SendEnterSequence()
+        call s:SendClearSequence()
+    endif
 endfunction
 
 function! s:KillRunnerPane()
@@ -69,15 +76,11 @@ function! s:TargetedTmuxCommand(command, target_pane)
 endfunction
 
 function! s:SendEnterSequence()
-    let targeted_cmd = s:TargetedTmuxCommand("send-keys", s:runner_pane)
-    let enter_sequence = targeted_cmd . " Enter"
-    call s:SendTmuxCommand(enter_sequence)
+    call s:SendKeys("Enter")
 endfunction
 
 function! s:SendClearSequence()
-    let targeted_cmd = s:TargetedTmuxCommand("send-keys", s:runner_pane)
-    let enter_sequence = targeted_cmd . " clear"
-    call s:SendTmuxCommand(enter_sequence)
+    call s:SendKeys("clear")
     call s:SendEnterSequence()
     sleep 50m
 endfunction
@@ -104,19 +107,30 @@ endfunction
 function! s:RotateRunner()
     let temp_window = s:BreakRunnerPaneToTempWindow()
     call s:ToggleOrientationVariable()
-    let join_cmd = join(["join-pane", "-s", ":".temp_window.".0", "-p", g:VtrPercentage, "-".g:VtrOrientation])
+    let join_cmd = join(["join-pane", "-s", ":".temp_window.".0",
+        \ "-p", g:VtrPercentage, "-".g:VtrOrientation])
     echom join_cmd
     call s:SendTmuxCommand(join_cmd)
     call s:FocusVimPane()
 endfunction
 
-function! s:SendCommandToRunner()
-    echohl String
-    let user_command = shellescape(input("Command to run: "))
+function! s:SendKeys(keys)
     let targeted_cmd = s:TargetedTmuxCommand("send-keys", s:runner_pane)
-    let full_command = join([targeted_cmd, user_command])
-    call s:SendClearSequence()
+    let full_command = join([targeted_cmd, a:keys])
     call s:SendTmuxCommand(full_command)
+endfunction
+
+function! s:HighlightedInput(prompt)
+    echohl String | let input = shellescape(input(a:prompt)) | echohl None
+    return input
+endfunction
+
+function! s:SendCommandToRunner()
+    let user_command = s:HighlightedInput("Command to send: ")
+    if g:VtrClearBeforeSend
+        call s:SendClearSequence()
+    endif
+    call s:SendKeys(user_command)
     call s:SendEnterSequence()
 endfunction
 
