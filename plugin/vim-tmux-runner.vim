@@ -24,7 +24,7 @@ function! s:OpenRunnerPane()
 endfunction
 
 function! s:KillRunnerPane()
-    call s:CallTmuxCommand("kill-pane -t " . s:cached_runner_pane)
+    call s:CallTargetedTmuxCommand("kill-pane", s:cached_runner_pane)
     unlet s:cached_runner_pane
 endfunction
 
@@ -42,7 +42,7 @@ function! s:TmuxPanes()
 endfunction
 
 function! s:FocusTmuxPane(pane_number)
-    call s:CallTmuxCommand("select-pane -t " . a:pane_number)
+    call s:CallTargetedTmuxCommand("select-pane", a:pane_number)
 endfunction
 
 function! s:FocusRunnerPane()
@@ -52,6 +52,11 @@ endfunction
 function! s:CallTmuxCommand(command)
     let prexied_command = "tmux " . a:command
     return system(prexied_command)
+endfunction
+
+function! s:CallTargetedTmuxCommand(command, target_pane)
+    let targeted_command = a:command . " -t " . a:target_pane
+    call s:CallTmuxCommand(targeted_command)
 endfunction
 
 command! VTROpenRunner :call s:OpenRunnerPane()
