@@ -22,6 +22,7 @@ function! s:InitializeVariables()
     call s:InitVariable("g:VtrOrientation", "v")
     call s:InitVariable("g:VtrInitialCommand", "")
     call s:InitVariable("g:VtrClearBeforeSend", 1)
+    call s:InitVariable("g:VtrPrompt", "Command to run: ")
 endfunction
 call s:InitializeVariables()
 
@@ -123,13 +124,13 @@ function! s:RotateRunner()
     call s:FocusVimPane()
 endfunction
 
-function! s:HighlightedInput(prompt)
-    echohl String | let input = shellescape(input(a:prompt)) | echohl None
+function! s:HighlightedPrompt()
+    echohl String | let input = shellescape(input(g:VtrPrompt)) | echohl None
     return input
 endfunction
 
 function! s:SendCommandToRunner()
-    let user_command = s:HighlightedInput("Command to send: ")
+    let user_command = s:HighlightedPrompt()
     if g:VtrClearBeforeSend
         call s:SendClearSequence()
     endif

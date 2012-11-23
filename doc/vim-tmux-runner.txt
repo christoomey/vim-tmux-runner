@@ -1,0 +1,119 @@
+*vim-tmux-runner.txt*   exceedingly simple vim/tmux integration
+
+                            Vim Tmux Runner
+                    vim and tmux, sittin' in a tree...
+
+==============================================================================
+CONTENTS                                                        *vtr-contents*
+
+    1. About............................ |VTR-About|
+    2. Usage ........................... |VTR-Usage|
+      2.1 .............................. |VTR-OpenRunner|
+      2.2 .............................. |VTR-KillRunner|
+    3. Configuration ................... |VTR-Configuration|
+
+
+==============================================================================
+ABOUT (1)                                                           *VTR-About*
+
+VTR -- Straightforward vim/tmux integration
+
+This plugin provides vim with an understanding of tmux. The plugin provides
+functionality to open a small tmux pane and send commands to run in that tmux
+pane.
+
+This plugin was heavily inspired by Vimux[1]. It is meant to provide a very
+similar feature set to Vimux, but use native vimscript. In addition VTR
+provides a few commands beyond those in Vimux, such as the ability to rotate
+the runner pane between orientations.
+
+[1] https://github.com/benmills/vimux
+
+
+==============================================================================
+USAGE (2)                                                           *VTR-Usage*
+
+VTR provides a collection of commands that allow vim to interact with tmux.
+
+
+------------------------------------------------------------------------------
+                                                               *VTR-OpenRunner*
+VtrOpenRunner~
+
+Open a tmux pane adjacent to the pane containing the current vim session. This
+command will make use of the |VTR-Orientation| and |VTR-Percentage| options.
+
+------------------------------------------------------------------------------
+                                                               *VTR-KillRunner*
+VtrKillRunner~
+
+Close the tmux runner pane.
+
+==============================================================================
+CONFIGURATION (3)                                           *VTR-Configuration*
+
+You can configure VTR using the following options:
+
+------------------------------------------------------------------------------
+                                                               *VTR-Percentage*
+2.1 g:VtrPercentage~
+
+The percent of the window the runner pane will occupy.
+
+  let g:VtrPercentage = 35
+
+Default: 20
+
+------------------------------------------------------------------------------
+                                                              *VTR-Orientation*
+2.2 g:VtrOrientation~
+
+The orientation used when creating the tmux split pane to use as the runner
+pane. The orientation argument is the inverse of vim's, ie "horizontal" splits
+in tmux will create a new pane to the right of the existing pane.
+
+    let g:VtrOrientation = "h"
+
+Options:
+  "v": vertical (split pane below vim pane)
+  "h": horizontal (split pane to the right of vim pane)
+
+Default: "v"
+
+------------------------------------------------------------------------------
+                                                           *VTR-InitialCommand*
+2.3 g:VtrInitialCommand
+
+Provide a command to be run just after the runner pane is created. This can
+be used to set the working directory, define an environment variable, etc.
+No command will be run if this is set to an empty string.
+
+  let g:VtrInitialCommand = "cd .."
+
+Default: ""
+
+------------------------------------------------------------------------------
+                                                          *VTR-ClearBeforeSend*
+2.4 g:VtrClearBeforeSend
+
+Before sending a command to the runner pane, send a clear sequence. This will
+make it easier to view and interpret the output in the runner pane. Set this
+to 0 to disable.
+
+  let g:VtrClearBeforeSend = 0
+
+Default: 1
+------------------------------------------------------------------------------
+                                                                   *VTR-Prompt*
+2.5 g:VtrPrompt~
+
+The string used when prompting the user for a command to run. It is best to
+include a space at the end of this string to visually separate the prompt from
+the users command.
+
+  let g:VtrPrompt = "What can I do you for?: "
+
+Default: "Command to run: "
+
+==============================================================================
+vim:tw=78:ts=2:sw=2:expandtab:ft=help:norl:
