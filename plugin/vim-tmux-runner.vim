@@ -33,7 +33,6 @@ function! s:OpenRunnerPane()
     call s:FocusVimPane()
     if g:VtrInitialCommand != ""
         call s:SendKeys(g:VtrInitialCommand)
-        call s:SendEnterSequence()
         call s:SendClearSequence()
     endif
 endfunction
@@ -75,13 +74,23 @@ function! s:TargetedTmuxCommand(command, target_pane)
     return a:command . " -t " . a:target_pane
 endfunction
 
+function! s:_SendKeys(keys)
+    let targeted_cmd = s:TargetedTmuxCommand("send-keys", s:runner_pane)
+    let full_command = join([targeted_cmd, a:keys])
+    call s:SendTmuxCommand(full_command)
+endfunction
+
+function! s:SendKeys(keys)
+    call s:_SendKeys(a:keys)
+    call s:SendEnterSequence()
+endfunction
+
 function! s:SendEnterSequence()
-    call s:SendKeys("Enter")
+    call s:_SendKeys("Enter")
 endfunction
 
 function! s:SendClearSequence()
     call s:SendKeys("clear")
-    call s:SendEnterSequence()
     sleep 50m
 endfunction
 
@@ -114,12 +123,6 @@ function! s:RotateRunner()
     call s:FocusVimPane()
 endfunction
 
-function! s:SendKeys(keys)
-    let targeted_cmd = s:TargetedTmuxCommand("send-keys", s:runner_pane)
-    let full_command = join([targeted_cmd, a:keys])
-    call s:SendTmuxCommand(full_command)
-endfunction
-
 function! s:HighlightedInput(prompt)
     echohl String | let input = shellescape(input(a:prompt)) | echohl None
     return input
@@ -131,7 +134,6 @@ function! s:SendCommandToRunner()
         call s:SendClearSequence()
     endif
     call s:SendKeys(user_command)
-    call s:SendEnterSequence()
 endfunction
 
 command! VTROpenRunner :call s:OpenRunnerPane()
