@@ -17,23 +17,42 @@ function! s:initVariable(var, value)
 endfunction
 
 function! s:OpenRunnerPane()
-    call s:CacheVimTmuxPane()
+    let s:cached_vim_pane = s:ActiveTmuxPaneNumber()
     call system("tmux split-window -p 20 -v")
-    call s:RefocusVimPane()
+    let s:cached_runner_pane = s:ActiveTmuxPaneNumber()
+    call s:FocusTmuxPane(s:cached_vim_pane)
 endfunction
 
-function! s:CacheVimTmuxPane()
+function! s:KillRunnerPane()
+    call system("tmux kill-pane -t " . s:cached_runner_pane)
+    unlet s:cached_runner_pane
+endfunction
+
+function! s:ActiveTmuxPaneNumber()
     let panes = system("tmux list-panes")
     for pane_title in split(panes, '\n')
         if pane_title =~ '\(active\)'
-            let s:cached_vim_pane = pane_title[0]
-            echo s:cached_vim_pane
+            return pane_title[0]
         endif
     endfor
 endfunction
 
-function! s:RefocusVimPane()
-    call system("tmux select-pane -t " . s:cached_vim_pane)
+function! s:TmuxPanes()
+    let panes = system("tmux list-panes")
+    return split(panes, '\n')
 endfunction
 
-command! VimTmuxRunnerOpenRunner :call s:OpenRunnerPane()
+function! s:FocusTmuxPane(pane_number)
+    call system("tmux select-pane -t " . a:pane_number)
+endfunction
+
+function! s:FocusRunnerPane()
+    call s:FocusTmuxPane(s:cached_runner_pane)
+endfunction
+
+command! VTROpenRunner :call s:OpenRunnerPane()
+command! VTRKillRunner :call s:KillRunnerPane()
+command! VTRFocusRunnerPane :call s:FocusRunnerPane()
+nmap ,vm :VTROpenRunner<cr>
+nmap ,kv :VTRKillRunner<cr>
+nmap ,fp :VTRFocusRunnerPane<cr>

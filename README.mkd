@@ -6,6 +6,12 @@ A simple, vimscript only, command runner for sending commands from vim to tmux
 
 This plugin exposes a command to open a small command runner window
 
+- Open runner window
+- Automatic cd to project root (via git cdup)
+- Send command (with escaping, auto-enter, auto-pre-clear)
+- Enter tmux-copy mode in pane
+- Maximize the runner pane
+
 ## Inspiration
 
 - Tslime.vim
