@@ -72,16 +72,22 @@ endfunction
 function! s:ResizeRunnerPane()
     let new_percent = s:HighlightedPrompt("Runner screen percentage: ")
     let pane_dimensions =  s:RunnerPaneDimensions()
-    let inputs = [pane_dimensions['height'], '*', new_percent,
+    let expand = (eval(join([new_percent, '>', g:VtrPercentage])))
+    if g:VtrOrientation == "v"
+        let relevant_dimension = pane_dimensions['height']
+        let direction = expand ? '-U' : '-D'
+    else
+        let relevant_dimension = pane_dimensions['width']
+        let direction = expand ? '-L' : '-R'
+    endif
+    let inputs = [relevant_dimension, '*', new_percent,
         \ '/',  g:VtrPercentage]
     let new_lines = eval(join(inputs)) " Not sure why I need to use eval...?
-    let lines_delta = abs(pane_dimensions['height'] - new_lines)
-    let move_down = (eval(join([new_percent, '<', g:VtrPercentage])))
-    let direction = move_down ? '-D' : '-U'
+    let lines_delta = abs(relevant_dimension - new_lines)
     let targeted_cmd = s:TargetedTmuxCommand("resize-pane", s:runner_pane)
     let full_command = join([targeted_cmd, direction, lines_delta])
-    let g:VtrPercentage = new_percent
     call s:SendTmuxCommand(full_command)
+    let g:VtrPercentage = new_percent
     if g:VtrClearOnResize
         call s:SendClearSequence()
     endif
