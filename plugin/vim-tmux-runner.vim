@@ -5,7 +5,6 @@
 " TODO: reattach pane rather than create if s:detached_window is set
 " TODO: normalize naming, 'runner' not 'pane'
 " TODO: update the clear sequence to use '^U^L'
-" TODO: update KillRunnerPane to kill detached as well as local
 " TODO: investigate occasional '[lost Server]' error from tmux
 
 function! s:InitVariable(var, value)
@@ -70,13 +69,35 @@ function! s:RequireDetachedPane()
     return 1
 endfunction
 
-function! s:KillRunnerPane()
-    if !s:RequireRunnerPane()
-        return
+function! s:RequireLocalPaneOrDetached()
+    if !exists('s:detached_window') && !exists('s:runner_pane')
+        echohl ErrorMsg | echom "VTR: No pane, local or detached." | echohl None
+        return 0
     endif
+    return 1
+endfunction
+
+function! s:KillLocalRunner()
     let targeted_cmd = s:TargetedTmuxCommand("kill-pane", s:runner_pane)
     call s:SendTmuxCommand(targeted_cmd)
     unlet s:runner_pane
+endfunction
+
+function! s:KillDetachedWindow()
+    let cmd = join(["kill-window", '-t', s:detached_window])
+    call s:SendTmuxCommand(cmd)
+    unlet s:detached_window
+endfunction
+
+function! s:KillRunnerPane()
+    if !s:RequireLocalPaneOrDetached()
+        return
+    endif
+    if exists("s:runner_pane")
+        call s:KillLocalRunner()
+    else
+        call s:KillDetachedWindow()
+    endif
 endfunction
 
 function! s:ActiveTmuxPaneNumber()
@@ -188,15 +209,16 @@ function! s:LastWindowNumber()
     return split(s:SendTmuxCommand("list-windows"), '\n')[-1][0]
 endfunction
 
+function! s:ToggleOrientationVariable()
+    let g:VtrOrientation = (g:VtrOrientation == "v" ? "h" : "v")
+endfunction
+
 function! s:BreakRunnerPaneToTempWindow()
     let targeted_cmd = s:TargetedTmuxCommand("break-pane", s:runner_pane)
     let full_command = join([targeted_cmd, "-d"])
     call s:SendTmuxCommand(full_command)
     let s:detached_window = s:LastWindowNumber()
-endfunction
-
-function! s:ToggleOrientationVariable()
-    let g:VtrOrientation = (g:VtrOrientation == "v" ? "h" : "v")
+    unlet s:runner_pane
 endfunction
 
 function! s:_ReattachPane()
@@ -204,6 +226,7 @@ function! s:_ReattachPane()
         \ "-p", g:VtrPercentage, "-".g:VtrOrientation])
     call s:SendTmuxCommand(join_cmd)
     unlet s:detached_window
+    let s:runner_pane = s:ActiveTmuxPaneNumber()
 endfunction
 
 function! s:ReattachPane()
