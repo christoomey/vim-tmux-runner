@@ -14,6 +14,7 @@ This plugin exposes a command to open a small command runner window
 
 ## Inspiration
 
-- Tslime.vim
-- Vimux
-- Turbux
+This plugin is heavily inspired by the functionality in the Vimux plugin. This
+plugin aims to implement a similar feature set while not requiring Vim with
+ruby requirement. In addition a few new commands not found in Vimux have been
+added to provide additional control over the tmux runner pane.

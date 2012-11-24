@@ -62,6 +62,33 @@ function! s:FocusTmuxPane(pane_number)
     call s:SendTmuxCommand(targeted_cmd)
 endfunction
 
+function! s:RunnerPaneDimensions()
+    let panes = s:TmuxPanes()
+    for pane in panes
+        if pane =~ '^'.s:runner_pane
+            let pane_info =  matchlist(pane, s:runner_pane.': [\(\d\+\)x\(\d\+\)\]')
+            return {'width': pane_info[1], 'height': pane_info[2]}
+        endif
+    endfor
+endfunction
+
+function! s:ResizeRunnerPane()
+    let new_percent = s:HighlightedPrompt("Runner screen percentage: ")
+    let pane_dimensions =  s:RunnerPaneDimensions()
+    let inputs = [pane_dimensions['height'], '*', new_percent, '/',  g:VtrPercentage]
+    let new_lines = eval(join(inputs)) " Not sure why I need to use eval...?
+    let lines_delta = abs(pane_dimensions['height'] - new_lines)
+    let move_down = (eval(join([new_percent, '<', g:VtrPercentage])))
+    let direction = move_down ? '-D' : '-U'
+    let targeted_cmd = s:TargetedTmuxCommand("resize-pane", s:runner_pane)
+    let full_command = join([targeted_cmd, direction, lines_delta])
+    let g:VtrPercentage = new_percent
+    call s:SendTmuxCommand(full_command)
+endfunction
+
+command! VTRResizePane :call s:ResizeRunnerPane()
+nmap ,rr :VTRResizePane<cr>
+
 function! s:FocusRunnerPane()
     call s:FocusTmuxPane(s:runner_pane)
 endfunction
@@ -114,23 +141,23 @@ function! s:ToggleOrientationVariable()
     let g:VtrOrientation = (g:VtrOrientation == "v" ? "h" : "v")
 endfunction
 
-function! s:RotateRunner()
+function! s:ReorientRunner()
     let temp_window = s:BreakRunnerPaneToTempWindow()
     call s:ToggleOrientationVariable()
     let join_cmd = join(["join-pane", "-s", ":".temp_window.".0",
         \ "-p", g:VtrPercentage, "-".g:VtrOrientation])
-    echom join_cmd
     call s:SendTmuxCommand(join_cmd)
+    call s:SendClearSequence()
     call s:FocusVimPane()
 endfunction
 
-function! s:HighlightedPrompt()
-    echohl String | let input = shellescape(input(g:VtrPrompt)) | echohl None
+function! s:HighlightedPrompt(prompt)
+    echohl String | let input = shellescape(input(a:prompt)) | echohl None
     return input
 endfunction
 
 function! s:SendCommandToRunner()
-    let user_command = s:HighlightedPrompt()
+    let user_command = s:HighlightedPrompt(g:VtrPrompt)
     if g:VtrClearBeforeSend
         call s:SendClearSequence()
     endif
@@ -141,8 +168,8 @@ command! VTROpenRunner :call s:OpenRunnerPane()
 command! VTRKillRunner :call s:KillRunnerPane()
 command! VTRFocusRunnerPane :call s:FocusRunnerPane()
 command! VTRSendCommandToRunner :call s:SendCommandToRunner()
-command! VTRRotateRunner :call s:RotateRunner()
-nmap ,rr :VTRRotateRunner<cr>
+command! VTRReorientRunner :call s:ReorientRunner()
+nmap ,ror :VTRReorientRunner<cr>
 nmap ,sc :VTRSendCommandToRunner<cr>
 nmap ,or :VTROpenRunner<cr>
 nmap ,kr :VTRKillRunner<cr>
