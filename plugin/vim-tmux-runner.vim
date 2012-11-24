@@ -1,6 +1,10 @@
 " TODO: guards on methods that expect pane, window to exist
 " TODO: full command and option docs
 " TODO: maximize command
+" TODO: unlet s:pane on anything the detaches, kills, etc
+" TODO: create pane if not already available when running sendcommand
+" TODO: reattach pane rather than create if s:detach_window is set
+" TODO: normalize naming, 'runner' not 'pane'
 
 function! s:InitVariable(var, value)
     if !exists(a:var)
@@ -36,7 +40,6 @@ function! s:OpenRunnerPane()
     endif
     if g:VtrInitialCommand != ""
         call s:SendKeys(g:VtrInitialCommand)
-        call s:SendClearSequence()
     endif
 endfunction
 
@@ -195,12 +198,20 @@ function! s:HighlightedPrompt(prompt)
     return input
 endfunction
 
+function! s:FlushCommand()
+    if exists("s:user_command")
+        unlet s:user_command
+    endif
+endfunction
+
 function! s:SendCommandToRunner()
-    let user_command = s:HighlightedPrompt(g:VtrPrompt)
+    if !exists("s:user_command")
+        let s:user_command = s:HighlightedPrompt(g:VtrPrompt)
+    endif
     if g:VtrClearBeforeSend
         call s:SendClearSequence()
     endif
-    call s:SendKeys(user_command)
+    call s:SendKeys(s:user_command)
 endfunction
 
 function! s:DefineCommands()
@@ -213,6 +224,7 @@ function! s:DefineCommands()
     command! VTRDetachPane :call s:DetachRunnerPane()
     command! VTRReattachPane :call s:ReattachPane()
     command! VTRClearRunner :call s:SendClearSequence()
+    command! VTRFlushCommand :call s:FlushCommand()
 endfunction
 
 function! s:DefineKeymaps()
@@ -226,6 +238,7 @@ function! s:DefineKeymaps()
         nmap ,dr :VTRDetachPane<cr>
         nmap ,ar :VTRReattachPane<cr>
         nmap ,cr :VTRClearRunner<cr>
+        nmap ,fc :VTRFlushCommand<cr>
     endif
 endfunction
 
