@@ -1,3 +1,7 @@
+" TODO: guards on methods that expect pane, window to exist
+" TODO: full command and option docs
+" TODO: maximize command
+
 function! s:InitVariable(var, value)
     if !exists(a:var)
         let escaped_value = substitute(a:value, "'", "''", "g")
@@ -17,6 +21,8 @@ function! s:InitializeVariables()
     call s:InitVariable("g:VtrUseVtrMaps", 1)
     call s:InitVariable("g:VtrClearOnResize", 1)
     call s:InitVariable("g:VtrClearOnReorient", 1)
+    call s:InitVariable("g:VtrClearOnReattach", 1)
+    call s:InitVariable("g:VtrDetachedName", "VTR_Pane")
 endfunction
 
 function! s:OpenRunnerPane()
@@ -32,6 +38,12 @@ function! s:OpenRunnerPane()
         call s:SendKeys(g:VtrInitialCommand)
         call s:SendClearSequence()
     endif
+endfunction
+
+function! s:DetachRunnerPane()
+    call s:BreakRunnerPaneToTempWindow()
+    let cmd = join(["rename-window -t", s:detached_window, g:VtrDetachedName])
+    call s:SendTmuxCommand(cmd)
 endfunction
 
 function! s:KillRunnerPane()
@@ -138,7 +150,7 @@ function! s:FocusVimPane()
     call s:FocusTmuxPane(s:vim_pane)
 endfunction
 
-function! s:TempWindowNumber()
+function! s:LastWindowNumber()
     return split(s:SendTmuxCommand("list-windows"), '\n')[-1][0]
 endfunction
 
@@ -146,23 +158,36 @@ function! s:BreakRunnerPaneToTempWindow()
     let targeted_cmd = s:TargetedTmuxCommand("break-pane", s:runner_pane)
     let full_command = join([targeted_cmd, "-d"])
     call s:SendTmuxCommand(full_command)
-    return s:TempWindowNumber()
+    let s:detached_window = s:LastWindowNumber()
 endfunction
 
 function! s:ToggleOrientationVariable()
     let g:VtrOrientation = (g:VtrOrientation == "v" ? "h" : "v")
 endfunction
 
+function! s:_ReattachPane()
+    let join_cmd = join(["join-pane", "-s", ":".s:detached_window.".0",
+        \ "-p", g:VtrPercentage, "-".g:VtrOrientation])
+    call s:SendTmuxCommand(join_cmd)
+    unlet s:detached_window
+endfunction
+
+function! s:ReattachPane()
+    call s:_ReattachPane()
+    call s:FocusVimPane()
+    if g:VtrClearOnReattach
+        call s:SendClearSequence()
+    endif
+endfunction
+
 function! s:ReorientRunner()
     let temp_window = s:BreakRunnerPaneToTempWindow()
     call s:ToggleOrientationVariable()
-    let join_cmd = join(["join-pane", "-s", ":".temp_window.".0",
-        \ "-p", g:VtrPercentage, "-".g:VtrOrientation])
-    call s:SendTmuxCommand(join_cmd)
+    call s:_ReattachPane()
+    call s:FocusVimPane()
     if g:VtrClearOnReorient
         call s:SendClearSequence()
     endif
-    call s:FocusVimPane()
 endfunction
 
 function! s:HighlightedPrompt(prompt)
@@ -185,6 +210,9 @@ function! s:DefineCommands()
     command! VTRSendCommandToRunner :call s:SendCommandToRunner()
     command! VTRReorientRunner :call s:ReorientRunner()
     command! VTRResizePane :call s:ResizeRunnerPane()
+    command! VTRDetachPane :call s:DetachRunnerPane()
+    command! VTRReattachPane :call s:ReattachPane()
+    command! VTRClearRunner :call s:SendClearSequence()
 endfunction
 
 function! s:DefineKeymaps()
@@ -195,9 +223,14 @@ function! s:DefineKeymaps()
         nmap ,or :VTROpenRunner<cr>
         nmap ,kr :VTRKillRunner<cr>
         nmap ,fr :VTRFocusRunnerPane<cr>
+        nmap ,dr :VTRDetachPane<cr>
+        nmap ,ar :VTRReattachPane<cr>
+        nmap ,cr :VTRClearRunner<cr>
     endif
 endfunction
 
 call s:InitializeVariables()
 call s:DefineCommands()
 call s:DefineKeymaps()
+
+" vim: set fdm=marker
