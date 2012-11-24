@@ -4,7 +4,8 @@ A simple, vimscript only, command runner for sending commands from vim to tmux
 
 ## Commands
 
-This plugin exposes a command to open a small command runner window
+This plugin exposes a command to open a small command runner window in a tmux
+pane, then send commands to it.
 
 - Open runner window
 - Automatic cd to project root (via git cdup)
@@ -12,9 +13,13 @@ This plugin exposes a command to open a small command runner window
 - Enter tmux-copy mode in pane
 - Maximize the runner pane
 
+Full documentation can be found [here][].
+
 ## Inspiration
 
 This plugin is heavily inspired by the functionality in the Vimux plugin. This
 plugin aims to implement a similar feature set while not requiring Vim with
 ruby requirement. In addition a few new commands not found in Vimux have been
 added to provide additional control over the tmux runner pane.
+
+[here]: https://github.com/christoomey/vim-tmux-runner/blob/master/doc/vim-tmux-runner.txt
