@@ -1,11 +1,6 @@
 " TODO: full command and option docs
 " TODO: maximize command
-" TODO: unlet s:pane on anything the detaches, kills, etc
-" TODO: create pane if not already available when running sendcommand
-" TODO: reattach pane rather than create if s:detached_window is set
 " TODO: normalize naming, 'runner' not 'pane'
-" TODO: update the clear sequence to use '^U^L'
-" TODO: investigate occasional '[lost Server]' error from tmux
 
 function! s:InitVariable(var, value)
     if !exists(a:var)
@@ -28,6 +23,7 @@ function! s:InitializeVariables()
     call s:InitVariable("g:VtrClearOnReorient", 1)
     call s:InitVariable("g:VtrClearOnReattach", 1)
     call s:InitVariable("g:VtrDetachedName", "VTR_Pane")
+    call s:InitVariable("g:VtrClearSequence", "")
 endfunction
 
 function! s:OpenRunnerPane()
@@ -177,7 +173,8 @@ function! s:_SendKeys(keys)
 endfunction
 
 function! s:SendKeys(keys)
-    call s:_SendKeys(a:keys)
+    let cmd = g:VtrClearBeforeSend ? g:VtrClearSequence.a:keys : a:keys
+    call s:_SendKeys(cmd)
     call s:SendEnterSequence()
 endfunction
 
@@ -189,8 +186,7 @@ function! s:SendClearSequence()
     if !s:RequireRunnerPane()
         return
     endif
-    call s:SendKeys("clear")
-    sleep 50m
+    call s:_SendKeys(g:VtrClearSequence)
 endfunction
 
 function! s:GitCdUp()
