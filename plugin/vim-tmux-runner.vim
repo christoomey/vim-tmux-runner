@@ -1,11 +1,12 @@
-" TODO: guards on methods that expect pane, window to exist
 " TODO: full command and option docs
 " TODO: maximize command
 " TODO: unlet s:pane on anything the detaches, kills, etc
 " TODO: create pane if not already available when running sendcommand
-" TODO: reattach pane rather than create if s:detach_window is set
+" TODO: reattach pane rather than create if s:detached_window is set
 " TODO: normalize naming, 'runner' not 'pane'
 " TODO: update the clear sequence to use '^U^L'
+" TODO: update KillRunnerPane to kill detached as well as local
+" TODO: investigate occasional '[lost Server]' error from tmux
 
 function! s:InitVariable(var, value)
     if !exists(a:var)
@@ -45,12 +46,34 @@ function! s:OpenRunnerPane()
 endfunction
 
 function! s:DetachRunnerPane()
+    if !s:RequireRunnerPane()
+        return
+    endif
     call s:BreakRunnerPaneToTempWindow()
     let cmd = join(["rename-window -t", s:detached_window, g:VtrDetachedName])
     call s:SendTmuxCommand(cmd)
 endfunction
 
+function! s:RequireRunnerPane()
+    if !exists("s:runner_pane")
+        echohl ErrorMsg | echom "VTR: No runner pane attached." | echohl None
+        return 0
+    endif
+    return 1
+endfunction
+
+function! s:RequireDetachedPane()
+    if !exists("s:detached_window")
+        echohl ErrorMsg | echom "VTR: No detached runner pane." | echohl None
+        return 0
+    endif
+    return 1
+endfunction
+
 function! s:KillRunnerPane()
+    if !s:RequireRunnerPane()
+        return
+    endif
     let targeted_cmd = s:TargetedTmuxCommand("kill-pane", s:runner_pane)
     call s:SendTmuxCommand(targeted_cmd)
     unlet s:runner_pane
@@ -86,6 +109,9 @@ function! s:RunnerPaneDimensions()
 endfunction
 
 function! s:ResizeRunnerPane()
+    if !s:RequireRunnerPane()
+        return
+    endif
     let new_percent = s:HighlightedPrompt("Runner screen percentage: ")
     let pane_dimensions =  s:RunnerPaneDimensions()
     let expand = (eval(join([new_percent, '>', g:VtrPercentage])))
@@ -110,6 +136,7 @@ function! s:ResizeRunnerPane()
 endfunction
 
 function! s:FocusRunnerPane()
+    call s:EnsureRunnerPane()
     call s:FocusTmuxPane(s:runner_pane)
 endfunction
 
@@ -138,6 +165,9 @@ function! s:SendEnterSequence()
 endfunction
 
 function! s:SendClearSequence()
+    if !s:RequireRunnerPane()
+        return
+    endif
     call s:SendKeys("clear")
     sleep 50m
 endfunction
@@ -177,6 +207,9 @@ function! s:_ReattachPane()
 endfunction
 
 function! s:ReattachPane()
+    if !s:RequireDetachedPane()
+        return
+    endif
     call s:_ReattachPane()
     call s:FocusVimPane()
     if g:VtrClearOnReattach
@@ -185,6 +218,9 @@ function! s:ReattachPane()
 endfunction
 
 function! s:ReorientRunner()
+    if !s:RequireRunnerPane()
+        return
+    endif
     let temp_window = s:BreakRunnerPaneToTempWindow()
     call s:ToggleOrientationVariable()
     call s:_ReattachPane()
@@ -206,6 +242,7 @@ function! s:FlushCommand()
 endfunction
 
 function! s:SendCommandToRunner()
+    call s:EnsureRunnerPane()
     if !exists("s:user_command")
         let s:user_command = s:HighlightedPrompt(g:VtrPrompt)
     endif
@@ -216,7 +253,7 @@ function! s:SendCommandToRunner()
 endfunction
 
 function! s:DefineCommands()
-    command! VTROpenRunner :call s:OpenRunnerPane()
+    command! VTROpenRunner :call s:EnsureRunnerPane()
     command! VTRKillRunner :call s:KillRunnerPane()
     command! VTRFocusRunnerPane :call s:FocusRunnerPane()
     command! VTRSendCommandToRunner :call s:SendCommandToRunner()
@@ -243,7 +280,18 @@ function! s:DefineKeymaps()
     endif
 endfunction
 
+function! s:EnsureRunnerPane()
+    if exists('s:detached_window')
+        call s:ReattachPane()
+    elseif exists('s:runner_pane')
+        return
+    else
+        call s:OpenRunnerPane()
+    endif
+endfunction
+
 function! VTRSendCommand(command)
+    call s:EnsureRunnerPane()
     let escaped_command = shellescape(a:command)
     call s:SendKeys(escaped_command)
 endfunction
