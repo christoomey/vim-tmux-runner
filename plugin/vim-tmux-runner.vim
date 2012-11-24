@@ -242,6 +242,10 @@ function! s:DefineKeymaps()
     endif
 endfunction
 
+function! VTRSendCommand(command)
+    call s:SendKeys(a:command)
+endfunction
+
 call s:InitializeVariables()
 call s:DefineCommands()
 call s:DefineKeymaps()
