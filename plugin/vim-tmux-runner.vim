@@ -5,6 +5,7 @@
 " TODO: create pane if not already available when running sendcommand
 " TODO: reattach pane rather than create if s:detach_window is set
 " TODO: normalize naming, 'runner' not 'pane'
+" TODO: update the clear sequence to use '^U^L'
 
 function! s:InitVariable(var, value)
     if !exists(a:var)
@@ -243,7 +244,8 @@ function! s:DefineKeymaps()
 endfunction
 
 function! VTRSendCommand(command)
-    call s:SendKeys(a:command)
+    let escaped_command = shellescape(a:command)
+    call s:SendKeys(escaped_command)
 endfunction
 
 call s:InitializeVariables()
