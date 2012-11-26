@@ -1,17 +1,38 @@
-*vim-tmux-runner.txt*   exceedingly simple vim/tmux integration
+*vim-tmux-runner.txt*	      For Vim version 7.3	      Last change: 2012 Nov 25
 
                             Vim Tmux Runner
-                    vim and tmux, sittin' in a tree...
+                    Vim and tmux, sittin' in a tree...
 
 ==============================================================================
 CONTENTS                                                        *vtr-contents*
 
-    1. About............................ |VTR-About|
-    2. Usage ........................... |VTR-Usage|
-      2.1 .............................. |VTR-OpenRunner|
-      2.2 .............................. |VTR-KillRunner|
-    3. Configuration ................... |VTR-Configuration|
-
+      1. About............................ |VTR-About|
+      2. Usage ........................... |VTR-Usage|
+        2.1 ................................ |VtrOpenRunner|
+        2.2 ................................ |VtrKillRunner|
+        2.1 ................................ |VtrSendCommandToRunner|
+        2.2 ................................ |VtrOpenRunner|
+        2.3 ................................ |VtrKillRunner|
+        2.4 ................................ |VtrFocusRunner|
+        2.5 ................................ |VtrResizeRunner|
+        2.6 ................................ |VtrReorientRunner|
+        2.7 ................................ |VtrDetachRunner|
+        2.8 ................................ |VtrReattachRunner|
+        2.9 ................................ |VtrClearRunner|
+        2.10 ............................... |VtrFlushCommand|
+      3. Configuration ................... |VTR-Configuration|
+        3.1 ................................ |VtrPercentage|
+        3.2 ................................ |VtrOrientation|
+        3.3 ................................ |VtrInitialCommand|
+        3.4 ................................ |VtrGitCdUpOnOpen|
+        3.5 ................................ |VtrClearBeforeSend|
+        3.5 ................................ |VtrPrompt|
+        3.6 ................................ |VtrUseVtrMaps|
+        3.7 ................................ |VtrClearOnResize|
+        3.8 ................................ |VtrClearOnReorient|
+        3.9 ................................ |VtrClearOnReattach|
+        3.10 ............................... |VtrDetachedName|
+        3.11 ............................... |VtrClearSequence|
 
 ==============================================================================
 ABOUT (1)                                                           *VTR-About*
@@ -22,51 +43,151 @@ This plugin provides vim with an understanding of tmux. The plugin provides
 functionality to open a small tmux pane and send commands to run in that tmux
 pane.
 
-This plugin was heavily inspired by Vimux[1]. It is meant to provide a very
+This plugin was created by Chris Toomey[1]. Any bugs or feature requests can
+be entered at the github repo[2] for the plugin. Any feedback is greatly
+appreciated.
+
+This plugin was heavily inspired by Vimux[3]. It is meant to provide a very
 similar feature set to Vimux, but use native vimscript. In addition VTR
 provides a few commands beyond those in Vimux, such as the ability to rotate
 the runner pane between orientations.
 
-[1] https://github.com/benmills/vimux
-
+[1] http://ctoomey.com
+[2] https://github.com/christoomey/vim-tmux-runner/issues
+[3] https://github.com/benmills/vimux
 
 ==============================================================================
 USAGE (2)                                                           *VTR-Usage*
 
-VTR provides a collection of commands that allow vim to interact with tmux.
+VTR provides a collection of commands and functions that allow vim to interact
+with tmux. The primary function is VTRSendCommand. This allows for any command
+string to be passed to tmux for execution.
 
+VTR uses a tmux "pane" to execute the provided command. A tmux pane is very
+similar to a vim split. Throughout VTR, this tmux pane used for command
+execution is referred to as the "runner". The runner by default will contain
+an instance of the default system shell, but other executables such as a
+python REPL, ruby irb session, or similar can be used. The power of VTR, and
+tmux, is that each pane is a fully independant shell environment. None the
+less, tmux allows for communication between these environments and it is this
+ability that give VTR its power.
 
 ------------------------------------------------------------------------------
-                                                               *VTR-OpenRunner*
-VtrOpenRunner~
+                                                       *VtrSendCommandToRunner*
+2.1 VtrSendCommandToRunner~
 
-Open a tmux pane adjacent to the pane containing the current vim session. This
-command will make use of the |VTR-Orientation| and |VTR-Percentage| options.
+Send a command to the tmux runner pane. This is the primary purpose of VTR. A
+new runner pane will be created. A detached pane will be reattached. By
+default, the runner will be cleared before sending the provided command, but
+this behavior can be disabled with the |VtrClearBeforeSend| setting.
+
+The first time this command is called, it will prompt for a command to send to
+the runner. The specific prompt text can be configured via the |VtPrompt|
+setting. The command is then stored in an internal variable and will
+continue to be used for subsequent calls to the command. The stored command
+can be cleared using |VtrFlushCommand|.
 
 ------------------------------------------------------------------------------
-                                                               *VTR-KillRunner*
-VtrKillRunner~
+                                                                *VtrOpenRunner*
+2.2 VtrOpenRunner~
 
-Close the tmux runner pane.
+Open a tmux pane, referred to as the "runner", adjacent to the tmux pane
+containing the current vim session. This command will make use of the
+|VtrOrientation| and |VtrPercentage| settings. Note, this command will
+restore a detached pane or create a new one as needed.
+
+------------------------------------------------------------------------------
+                                                                *VtrKillRunner*
+2.3 VtrKillRunner~
+
+Kill the tmux runner pane. this pane will kill either the local or detached
+runner pane. this command does nothing if there is currently not a runner
+pane.
+
+------------------------------------------------------------------------------
+                                                               *VtrFocusRunner*
+2.4 VtrFocusRunner~
+
+Move the cursor to the runner to interact directly with it. A new runner will
+be created if one does not exist and a detached pane will be restored as
+needed.
+
+------------------------------------------------------------------------------
+                                                              *VtrResizeRunner*
+2.5 VtrResizeRunner~
+
+Prompt for a new percentage then resize the runner pane to that percentage.
+This command will update the |VtrPercentage| setting for the current vim
+session. The |VtrPercentage| will be reset if vim is closed. By default, the
+runner will be cleared after resizing, but this behavior can be disabled
+with the |VtrClearOnResize| setting.
+
+------------------------------------------------------------------------------
+                                                            *VtrReorientRunner*
+2.6 VtrReorientRunner~
+
+Switch the runner pane from its current orientation to the alternate
+orientation (horizontal or vertical). The |VtrPercentage| will be maintained
+through the reorientation. By default, the runner will be cleared after
+reorienting, but this behavior can be disabled with the |VtrClearOnReorient|
+setting.
+
+------------------------------------------------------------------------------
+                                                              *VtrDetachRunner*
+2.7 VtrDetachRunner~
+
+Detach the runner pane to its own window while keeping the cursor focus on the
+vim window. This command is useful if there are details in the runner pane or
+significant setup implemented in the runner pane that will be useful at a
+later time, but current the runner pane is not needed. Rather than killing the
+runner, this command simply stashes it away in its own window until it is
+needed again. The runner can later be restored with any of |VtrReattachRunner|,
+|VtrOpenRunner|, or |VtrFocusRunner|. The runner can still be killed with the
+|VtrKillRunner| command.
+
+------------------------------------------------------------------------------
+                                                            *VtrReattachRunner*
+2.8 VtrReattachRunner~
+
+Reattach the runner pane. This command assumes that the runner has previously
+been dismissed using the |VtrDetachRunner| command. The pane will be restored
+with the last |VtrOrientation| and |VtrPercentage| combination used. By
+default the runner pane will be cleared after being reattached, but this
+behavior can be disabled using the |VtrClearOnReattach| setting.
+
+------------------------------------------------------------------------------
+                                                               *VtrClearRunner*
+2.9 VtrClearRunner~
+
+Send the key sequence defined by the |VtrClearSequence| setting to the runner.
+By default this will clear any unfinished commands at the shell prompt and
+move the prompt up to hide any previous command output.
+
+------------------------------------------------------------------------------
+                                                              *VtrFlushCommand*
+2.10 VtrFlushCommand~
+
+Flush the previous run command variable. After running this command, the next
+run of |VtrSendCommandToRunner| will again prompt for the command to run.
 
 ==============================================================================
 CONFIGURATION (3)                                           *VTR-Configuration*
 
-You can configure VTR using the following options:
+You can configure VTR using the following settings:
 
 ------------------------------------------------------------------------------
-                                                               *VTR-Percentage*
-2.1 g:VtrPercentage~
+                                                                *VtrPercentage*
+3.1 g:VtrPercentage~
 
-The percent of the window the runner pane will occupy.
+The percent of the tmux window the runner pane will occupy.
 
   let g:VtrPercentage = 35
 
 Default: 20
 
 ------------------------------------------------------------------------------
-                                                              *VTR-Orientation*
-2.2 g:VtrOrientation~
+                                                               *VtrOrientation*
+3.2 g:VtrOrientation~
 
 The orientation used when creating the tmux split pane to use as the runner
 pane. The orientation argument is the inverse of vim's, ie "horizontal" splits
@@ -81,8 +202,8 @@ Options:
 Default: "v"
 
 ------------------------------------------------------------------------------
-                                                           *VTR-InitialCommand*
-2.3 g:VtrInitialCommand
+                                                            *VtrInitialCommand*
+3.3 g:VtrInitialCommand~
 
 Provide a command to be run just after the runner pane is created. This can
 be used to set the working directory, define an environment variable, etc.
@@ -93,27 +214,135 @@ No command will be run if this is set to an empty string.
 Default: ""
 
 ------------------------------------------------------------------------------
-                                                          *VTR-ClearBeforeSend*
-2.4 g:VtrClearBeforeSend
+                                                            *VtrInitialCommand*
+3.4 g:VtrGitCdUpOnOpen~
 
-Before sending a command to the runner pane, send a clear sequence. This will
-make it easier to view and interpret the output in the runner pane. Set this
-to 0 to disable.
+When opening a new runner, if currently within a git repo then change the
+working directory to the root of the git repo. This can be useful for some
+test runners which behave differently depending on where they are run from. By
+default this functionality is disabled.
+
+  let g:VtrInitialCommand = 1
+
+Default: 0
+
+------------------------------------------------------------------------------
+                                                           *VtrClearBeforeSend*
+3.5 g:VtrClearBeforeSend~
+
+Before sending a command to the runner pane, send the clear sequence defined
+by the |VtrClearSequence| setting. This will make it easier to view and
+interpret the output in the runner pane. Set this to 0 to disable.
 
   let g:VtrClearBeforeSend = 0
 
 Default: 1
-------------------------------------------------------------------------------
-                                                                   *VTR-Prompt*
-2.5 g:VtrPrompt~
 
-The string used when prompting the user for a command to run. It is best to
-include a space at the end of this string to visually separate the prompt from
-the users command.
+------------------------------------------------------------------------------
+                                                                   *VtrPrompt*
+3.5 g:VtrPrompt~
+
+The string used when prompting for a command to run. It is best to include a
+space at the end of this string to visually separate the prompt from the users
+command.
 
   let g:VtrPrompt = "What can I do you for?: "
 
 Default: "Command to run: "
+
+------------------------------------------------------------------------------
+                                                                *VtrUseVtrMaps*
+3.6 g:VtrUseVtrMaps~
+
+Allow VTR to define a set of key mappings to provide easy access to the VTR
+command set. As a vim user, I consider my <leader> space to be sacred, so
+these maps are disabled by default. To allow VTR to set its maps, add the
+following to your vimrc:
+
+  let g:VtrUseVtrMaps = 1
+
+The map set provided by VTR is:
+
+        Mapping      |   Command
+        -----------------------------
+        <leader>rr   |   VtrResizeRunner
+        <leader>ror  |   VtrReorientRunner
+        <leader>sc   |   VtrSendCommandToRunner
+        <leader>or   |   VtrOpenRunner
+        <leader>kr   |   VtrKillRunner
+        <leader>fr   |   VtrFocusRunner
+        <leader>dr   |   VtrDetachRunner
+        <leader>ar   |   VtrReattachRunner
+        <leader>cr   |   VtrClearRunner
+        <leader>fc   |   VtrFlushCommand
+
+Default: 0
+
+------------------------------------------------------------------------------
+                                                             *VtrClearOnResize*
+3.7 g:VtrClearOnResize~
+
+Send the |VtrClearSequence| after resizing the runner via the
+|VtrResizeRunner| command.
+
+  let g:VtrClearOnResize = 0
+
+Default: 1
+
+------------------------------------------------------------------------------
+                                                           *VtrClearOnReorient*
+3.8 g:VtrClearOnReorient~
+
+Send the |VtrClearSequence| after reorienting the runner via the
+|VtrReorientRunner| command.
+
+  let g:VtrClearOnReorient = 0
+
+Default: 1
+
+------------------------------------------------------------------------------
+                                                           *VtrClearOnReattach*
+3.9 g:VtrClearOnReattach~
+
+Send the |VtrClearSequence| after reattaching the runner via the
+|VtrReattachRunner| command.
+
+  let g:VtrClearOnReattach = 0
+
+Default: 1
+
+------------------------------------------------------------------------------
+                                                              *VtrDetachedName*
+3.10 g:VtrDetachedName~
+
+The name to use for the temporary window used when dismissing the runner via
+the |VtrDetachRunner| command. This is provided in the rare event that the
+window name "VTR_Pane" is already used and you would like to distinguish the
+VTR detached runner pane window.
+
+  let g:VtrDetachedName = "WildAndWackyWindowName"
+
+Default: "VTR_Pane"
+
+------------------------------------------------------------------------------
+                                                             *VtrClearSequence*
+3.11 g:VtrClearSequence~
+
+The character sequence to send to clear the runner. This sequence is used in
+the explicit VTR comamnd |VtrClearRunner|. In addition, the sequence may be
+used with the commands |VtrSendCommandToRunner|, |VtrResizeRunner|,
+|VtrReattachRunner|, and |VtrReorientRunner| depending on the current value of
+their respective "ClearOn" settings.
+
+The default sequence will clear any unfinished commands sent to the shell
+prompt within the runner pane and clear the scrollback history to present a
+clean prompt ready for the next command. The character literals, , for
+<Ctrl-u> and <Ctrl-l> respectively, can be inserted using <Ctrl-v> while in
+insert mode. See the help file, ':help i_Ctrl-v', for more detail.
+
+  let g:VtrClearSequence = ""
+
+Default: ""
 
 ==============================================================================
 vim:tw=78:ts=2:sw=2:expandtab:ft=help:norl:
