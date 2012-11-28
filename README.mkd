@@ -1,6 +1,6 @@
 # VTR [Vim Tmux Runner]
 
-A simple, vimscript only, command runner for sending commands from vim to tmux
+A simple, vimscript only, command runner for sending commands from vim to tmux.
 
 ## Usage
 
@@ -44,12 +44,13 @@ implemented, the API is subject to change any time up until v1.0.
 
 ## Inspiration
 
-This plugin is heavily inspired by the functionality in the Vimux plugin. This
-plugin aims to implement a similar feature set while not requiring Vim with
-ruby requirement. In addition a few new commands not found in Vimux have been
-added to provide additional control over the tmux runner pane.
+This plugin is heavily inspired by the functionality in the [Vimux][] plugin.
+This plugin aims to implement a similar feature set while not requiring Vim
+with ruby requirement. In addition a few new commands not found in Vimux have
+been added to provide additional control over the tmux runner pane.
 
 [the included doc file]: https://github.com/christoomey/vim-tmux-runner/blob/master/doc/vim-tmux-runner.txt
 [Pathogen]: https://github.com/tpope/vim-pathogen
 [Vundle]: https://github.com/gmarik/vundle
 [tmux]: http://tmux.sourceforge.net/
+[Vimux]: https://github.com/benmills/vimux
