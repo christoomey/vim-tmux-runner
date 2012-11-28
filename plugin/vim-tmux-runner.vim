@@ -204,6 +204,7 @@ endfunction
 
 function! s:RunnerDimensionSpec()
     let dimensions = join(["-p", s:vtr_percentage, "-".s:vtr_orientation])
+    return dimensions
 endfunction
 
 function! s:_ReattachPane()
