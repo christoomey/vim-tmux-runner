@@ -11,21 +11,6 @@ function! s:InitVariable(var, value)
     return 0
 endfunction
 
-function! s:InitializeVariables()
-    call s:InitVariable("g:VtrPercentage", 20)
-    call s:InitVariable("g:VtrOrientation", "v")
-    call s:InitVariable("g:VtrInitialCommand", "")
-    call s:InitVariable("g:VtrClearBeforeSend", 1)
-    call s:InitVariable("g:VtrGitCdUpOnOpen", 1)
-    call s:InitVariable("g:VtrPrompt", "Command to run: ")
-    call s:InitVariable("g:VtrUseVtrMaps", 1)
-    call s:InitVariable("g:VtrClearOnResize", 1)
-    call s:InitVariable("g:VtrClearOnReorient", 1)
-    call s:InitVariable("g:VtrClearOnReattach", 1)
-    call s:InitVariable("g:VtrDetachedName", "VTR_Pane")
-    call s:InitVariable("g:VtrClearSequence", "")
-endfunction
-
 function! s:OpenRunnerPane()
     let s:vim_pane = s:ActiveTmuxPaneNumber()
     let cmd = join(["split-window -p", g:VtrPercentage, "-".g:VtrOrientation])
@@ -261,42 +246,14 @@ function! s:FlushCommand()
 endfunction
 
 function! s:SendCommandToRunner()
-    call s:EnsureRunnerPane()
     if !exists("s:user_command")
         let s:user_command = s:HighlightedPrompt(g:VtrPrompt)
     endif
+    call s:EnsureRunnerPane()
     if g:VtrClearBeforeSend
         call s:SendClearSequence()
     endif
     call s:SendKeys(s:user_command)
-endfunction
-
-function! s:DefineCommands()
-    command! VTROpenRunner :call s:EnsureRunnerPane()
-    command! VTRKillRunner :call s:KillRunnerPane()
-    command! VTRFocusRunnerPane :call s:FocusRunnerPane()
-    command! VTRSendCommandToRunner :call s:SendCommandToRunner()
-    command! VTRReorientRunner :call s:ReorientRunner()
-    command! VTRResizePane :call s:ResizeRunnerPane()
-    command! VTRDetachPane :call s:DetachRunnerPane()
-    command! VTRReattachPane :call s:ReattachPane()
-    command! VTRClearRunner :call s:SendClearSequence()
-    command! VTRFlushCommand :call s:FlushCommand()
-endfunction
-
-function! s:DefineKeymaps()
-    if g:VtrUseVtrMaps
-        nmap ,rr :VTRResizePane<cr>
-        nmap ,ror :VTRReorientRunner<cr>
-        nmap ,sc :VTRSendCommandToRunner<cr>
-        nmap ,or :VTROpenRunner<cr>
-        nmap ,kr :VTRKillRunner<cr>
-        nmap ,fr :VTRFocusRunnerPane<cr>
-        nmap ,dr :VTRDetachPane<cr>
-        nmap ,ar :VTRReattachPane<cr>
-        nmap ,cr :VTRClearRunner<cr>
-        nmap ,fc :VTRFlushCommand<cr>
-    endif
 endfunction
 
 function! s:EnsureRunnerPane()
@@ -309,11 +266,55 @@ function! s:EnsureRunnerPane()
     endif
 endfunction
 
-function! VTRSendCommand(command)
+function! VtrSendCommand(command)
     call s:EnsureRunnerPane()
     let escaped_command = shellescape(a:command)
     call s:SendKeys(escaped_command)
 endfunction
+
+function! s:DefineCommands()
+    command! VtrSendCommandToRunner :call s:SendCommandToRunner()
+    command! VtrOpenRunner :call s:EnsureRunnerPane()
+    command! VtrKillRunner :call s:KillRunnerPane()
+    command! VtrFocusRunner :call s:FocusRunnerPane()
+    command! VtrResizeRunner :call s:ResizeRunnerPane()
+    command! VtrReorientRunner :call s:ReorientRunner()
+    command! VtrDetachRunner :call s:DetachRunnerPane()
+    command! VtrReattachRunner :call s:ReattachPane()
+    command! VtrClearRunner :call s:SendClearSequence()
+    command! VtrFlushCommand :call s:FlushCommand()
+endfunction
+
+function! s:DefineKeymaps()
+    if g:VtrUseVtrMaps
+        nmap ,rr :VtrResizeRunner<cr>
+        nmap ,ror :VtrReorientRunner<cr>
+        nmap ,sc :VtrSendCommandToRunner<cr>
+        nmap ,or :VtrOpenRunner<cr>
+        nmap ,kr :VtrKillRunner<cr>
+        nmap ,fr :VtrFocusRunner<cr>
+        nmap ,dr :VtrDetachRunner<cr>
+        nmap ,ar :VtrReattachRunner<cr>
+        nmap ,cr :VtrClearRunner<cr>
+        nmap ,fc :VtrFlushCommand<cr>
+    endif
+endfunction
+
+function! s:InitializeVariables()
+    call s:InitVariable("g:VtrPercentage", 20)
+    call s:InitVariable("g:VtrOrientation", "v")
+    call s:InitVariable("g:VtrInitialCommand", "")
+    call s:InitVariable("g:VtrGitCdUpOnOpen", 0)
+    call s:InitVariable("g:VtrClearBeforeSend", 1)
+    call s:InitVariable("g:VtrPrompt", "Command to run: ")
+    call s:InitVariable("g:VtrUseVtrMaps", 0)
+    call s:InitVariable("g:VtrClearOnResize", 1)
+    call s:InitVariable("g:VtrClearOnReorient", 1)
+    call s:InitVariable("g:VtrClearOnReattach", 1)
+    call s:InitVariable("g:VtrDetachedName", "VTR_Pane")
+    call s:InitVariable("g:VtrClearSequence", "")
+endfunction
+
 
 call s:InitializeVariables()
 call s:DefineCommands()
