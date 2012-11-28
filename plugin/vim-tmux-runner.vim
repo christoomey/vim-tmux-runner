@@ -254,6 +254,12 @@ function! s:SendCommandToRunner()
     if !exists("s:user_command")
         let s:user_command = s:HighlightedPrompt(g:VtrPrompt)
     endif
+    let escaped_empty_string = "''"
+    if s:user_command == escaped_empty_string
+        unlet s:user_command
+        echohl ErrorMsg | echom "VTR: command string required" | echohl None
+        return
+    endif
     call s:EnsureRunnerPane()
     if g:VtrClearBeforeSend
         call s:SendClearSequence()
