@@ -13,7 +13,7 @@ endfunction
 
 function! s:OpenRunnerPane()
     let s:vim_pane = s:ActiveTmuxPaneNumber()
-    let cmd = join(["split-window -p", g:VtrPercentage, "-".g:VtrOrientation])
+    let cmd = join(["split-window -p", s:vtr_percentage, "-".s:vtr_orientation])
     call s:SendTmuxCommand(cmd)
     let s:runner_pane = s:ActiveTmuxPaneNumber()
     call s:FocusVimPane()
@@ -116,8 +116,8 @@ function! s:ResizeRunnerPane()
     endif
     let new_percent = s:HighlightedPrompt("Runner screen percentage: ")
     let pane_dimensions =  s:RunnerPaneDimensions()
-    let expand = (eval(join([new_percent, '>', g:VtrPercentage])))
-    if g:VtrOrientation == "v"
+    let expand = (eval(join([new_percent, '>', s:vtr_percentage])))
+    if s:vtr_orientation == "v"
         let relevant_dimension = pane_dimensions['height']
         let direction = expand ? '-U' : '-D'
     else
@@ -125,13 +125,13 @@ function! s:ResizeRunnerPane()
         let direction = expand ? '-L' : '-R'
     endif
     let inputs = [relevant_dimension, '*', new_percent,
-        \ '/',  g:VtrPercentage]
+        \ '/',  s:vtr_percentage]
     let new_lines = eval(join(inputs)) " Not sure why I need to use eval...?
     let lines_delta = abs(relevant_dimension - new_lines)
     let targeted_cmd = s:TargetedTmuxCommand("resize-pane", s:runner_pane)
     let full_command = join([targeted_cmd, direction, lines_delta])
     call s:SendTmuxCommand(full_command)
-    let g:VtrPercentage = new_percent
+    let s:vtr_percentage = new_percent
     if g:VtrClearOnResize
         call s:SendClearSequence()
     endif
@@ -191,7 +191,7 @@ function! s:LastWindowNumber()
 endfunction
 
 function! s:ToggleOrientationVariable()
-    let g:VtrOrientation = (g:VtrOrientation == "v" ? "h" : "v")
+    let s:vtr_orientation = (s:vtr_orientation == "v" ? "h" : "v")
 endfunction
 
 function! s:BreakRunnerPaneToTempWindow()
@@ -202,9 +202,13 @@ function! s:BreakRunnerPaneToTempWindow()
     unlet s:runner_pane
 endfunction
 
+function! s:RunnerDimensionSpec()
+    let dimensions = join(["-p", s:vtr_percentage, "-".s:vtr_orientation])
+endfunction
+
 function! s:_ReattachPane()
     let join_cmd = join(["join-pane", "-s", ":".s:detached_window.".0",
-        \ "-p", g:VtrPercentage, "-".g:VtrOrientation])
+        \ s:RunnerDimensionSpec()])
     call s:SendTmuxCommand(join_cmd)
     unlet s:detached_window
     let s:runner_pane = s:ActiveTmuxPaneNumber()
@@ -313,6 +317,8 @@ function! s:InitializeVariables()
     call s:InitVariable("g:VtrClearOnReattach", 1)
     call s:InitVariable("g:VtrDetachedName", "VTR_Pane")
     call s:InitVariable("g:VtrClearSequence", "")
+    let s:vtr_percentage = g:VtrPercentage
+    let s:vtr_orientation = g:VtrOrientation
 endfunction
 
 
