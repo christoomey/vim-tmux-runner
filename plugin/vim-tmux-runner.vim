@@ -1,6 +1,5 @@
-" TODO: full command and option docs
 " TODO: maximize command
-" TODO: normalize naming, 'runner' not 'pane'
+" TODO: open pane in other window, then copy in (avoid flickering during init)
 
 function! s:InitVariable(var, value)
     if !exists(a:var)
@@ -250,7 +249,10 @@ function! s:FlushCommand()
     endif
 endfunction
 
-function! s:SendCommandToRunner()
+function! s:SendCommandToRunner(...)
+    if exists("a:1") && a:1 != ""
+        let s:user_command = shellescape(a:1)
+    endif
     if !exists("s:user_command")
         let s:user_command = s:HighlightedPrompt(g:VtrPrompt)
     endif
@@ -284,7 +286,7 @@ function! VtrSendCommand(command)
 endfunction
 
 function! s:DefineCommands()
-    command! VtrSendCommandToRunner :call s:SendCommandToRunner()
+    command! -nargs=? VtrSendCommandToRunner call s:SendCommandToRunner(<f-args>)
     command! VtrOpenRunner :call s:EnsureRunnerPane()
     command! VtrKillRunner :call s:KillRunnerPane()
     command! VtrFocusRunner :call s:FocusRunnerPane()
