@@ -284,11 +284,13 @@ Default: 0
 3.7 g:VtrClearOnResize~
 
 Send the |VtrClearSequence| after resizing the runner via the
-|VtrResizeRunner| command.
+|VtrResizeRunner| command. This option is turned off by default as
+most often a resize is used to better see the content currently in
+the runner pane.
 
-  let g:VtrClearOnResize = 0
+  let g:VtrClearOnResize = 1
 
-Default: 1
+Default: 0
 
 ------------------------------------------------------------------------------
                                                            *VtrClearOnReorient*
