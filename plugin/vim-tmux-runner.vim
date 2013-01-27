@@ -10,7 +10,20 @@ function! s:InitVariable(var, value)
     return 0
 endfunction
 
-function! s:OpenRunnerPane()
+function! s:DictFetch(dict, key, default)
+    if has_key(a:dict, a:key)
+        return a:dict[a:key]
+    else
+        return a:default
+    endif
+endfunction
+
+function! s:CreateRunnerPane(...)
+    if exists("a:1")
+        let s:vtr_orientation = s:DictFetch(a:1, 'orientation', s:vtr_orientation)
+        let s:vtr_percentage = s:DictFetch(a:1, 'percentage', s:vtr_percentage)
+        let g:VtrInitialCommand = s:DictFetch(a:1, 'cmd', g:VtrInitialCommand)
+    endif
     let s:vim_pane = s:ActiveTmuxPaneNumber()
     let cmd = join(["split-window -p", s:vtr_percentage, "-".s:vtr_orientation])
     call s:SendTmuxCommand(cmd)
@@ -273,13 +286,17 @@ function! s:SendCommandToRunner(...)
     call s:SendKeys(s:user_command)
 endfunction
 
-function! s:EnsureRunnerPane()
+function! s:EnsureRunnerPane(...)
     if exists('s:detached_window')
         call s:ReattachPane()
     elseif exists('s:runner_pane')
         return
     else
-        call s:OpenRunnerPane()
+        if exists('a:1')
+            call s:CreateRunnerPane(a:1)
+        else
+            call s:CreateRunnerPane()
+        endif
     endif
 endfunction
 
@@ -322,9 +339,9 @@ endfunction
 function! s:DefineCommands()
     command! -nargs=? VtrSendCommandToRunner call s:SendCommandToRunner(<f-args>)
     command! -nargs=? VtrResizeRunner call s:ResizeRunnerPane(<args>)
+    command! -nargs=? VtrOpenRunner call s:EnsureRunnerPane(<args>)
     command! VtrSendSelectedToRunner call s:SendSelectedToRunner()
     command! VtrSendLineToRunner call s:SendLineToRunner()
-    command! VtrOpenRunner call s:EnsureRunnerPane()
     command! VtrKillRunner call s:KillRunnerPane()
     command! VtrFocusRunner call s:FocusRunnerPane()
     command! VtrReorientRunner call s:ReorientRunner()

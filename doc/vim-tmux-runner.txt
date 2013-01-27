@@ -37,9 +37,9 @@ CONTENTS                                                        *vtr-contents*
 ==============================================================================
 ABOUT (1)                                                           *VTR-About*
 
-VTR -- Straightforward vim/tmux integration
+VTR -- Straightforward Vim/tmux integration
 
-This plugin provides vim with an understanding of tmux. The plugin provides
+This plugin provides Vim with an understanding of tmux. The plugin provides
 functionality to open a small tmux pane and send commands to run in that tmux
 pane.
 
@@ -50,27 +50,36 @@ appreciated.
 This plugin was heavily inspired by Vimux[3]. It is meant to provide a very
 similar feature set to Vimux, but use native vimscript. In addition VTR
 provides a few commands beyond those in Vimux, such as the ability to rotate
-the runner pane between orientations.
+the runner pane between orientations. In addition, the code for sending text
+from a Vim buffer to the tmux runner pane for execution was modeled on the
+tslime.vim[4] plugin.
 
 [1] http://ctoomey.com
 [2] https://github.com/christoomey/vim-tmux-runner/issues
 [3] https://github.com/benmills/vimux
+[4] https://github.com/kikijump/tslime.vim
 
 ==============================================================================
 USAGE (2)                                                           *VTR-Usage*
 
-VTR provides a collection of commands and functions that allow vim to interact
-with tmux. The primary function is VTRSendCommand. This allows for any command
-string to be passed to tmux for execution.
+VTR provides a collection of commands and functions that allow Vim to interact
+with tmux. The primary command is VtrSendCommandToRunner. This allows for any
+command string to be passed to tmux for execution. The commands
+VtrSendLineToRunner and VtrSendSelectedToRunner allow for either the current
+visually selected region or the current line to be sent to the tmux runner
+pane for execution.  This functionality is similar to SLIME[5] mode for the
+Emacs text editor.
 
 VTR uses a tmux "pane" to execute the provided command. A tmux pane is very
-similar to a vim split. Throughout VTR, this tmux pane used for command
-execution is referred to as the "runner". The runner by default will contain
-an instance of the default system shell, but other executables such as a
-python REPL, ruby irb session, or similar can be used. The power of VTR, and
-tmux, is that each pane is a fully independant shell environment. None the
-less, tmux allows for communication between these environments and it is this
-ability that give VTR its power.
+similar to a Vim split. Throughout VTR this tmux pane used for command
+execution is referred to as the "runner" pane. The runner by default will
+start an instance of the system shell, but other executables such as a python
+REPL, ruby irb session, or similar then be opened within that shell be used.
+The power of VTR and tmux is that each pane is a fully independent shell
+environment. None the less, tmux allows for communication between these
+environments and it is this ability that give VTR its power.
+
+[5] http://common-lisp.net/project/slime/
 
 ------------------------------------------------------------------------------
                                                        *VtrSendCommandToRunner*
@@ -91,22 +100,36 @@ can be cleared using |VtrFlushCommand|.
                                                           *VtrSendLineToRunner*
 2.2 VtrSendLineToRunner~
 
-Send the current line to the runner pane for execution.
+Send the current line from the Vim buffer to the runner pane for execution.
 
 ------------------------------------------------------------------------------
                                                       *VtrSendSelectedToRunner*
 2.3 VtrSendSelectedToRunner~
 
-Send the current visual selection to the runner pane for execution.
+Send the current visual selection in the Vim buffer to the runner pane for
+execution.
 
 ------------------------------------------------------------------------------
                                                                 *VtrOpenRunner*
 2.4 VtrOpenRunner~
 
 Open a tmux pane, referred to as the "runner", adjacent to the tmux pane
-containing the current vim session. This command will make use of the
+containing the current Vim session. This command will make use of the
 |VtrOrientation| and |VtrPercentage| settings. Note, this command will
 restore a detached pane or create a new one as needed.
+
+This command can also be passed a Vim Dictionary with parameters for the new
+pane to override the defaults. This can be used to create context specific
+runner panes with sizing and orientation that is relevant for that use case.
+
+Script runner:
+  VtrOpenRunner {'orientation': 'h', 'percent': 50}
+
+Test runner:
+  VtrOpenRunner {'orientation': 'v', 'percent': 20}
+
+Ruby Repl:
+  VtrOpenRunner {'orientation': 'h', 'percent': 50, 'cmd': 'irb'}
 
 ------------------------------------------------------------------------------
                                                                 *VtrKillRunner*
@@ -129,8 +152,8 @@ needed.
 2.7 VtrResizeRunner~
 
 Prompt for a new percentage then resize the runner pane to that percentage.
-This command will update the |VtrPercentage| setting for the current vim
-session. The |VtrPercentage| will be reset if vim is closed. By default, the
+This command will update the |VtrPercentage| setting for the current Vim
+session. The |VtrPercentage| will be reset if Vim is closed. By default, the
 runner will be cleared after resizing, but this behavior can be disabled
 with the |VtrClearOnResize| setting.
 
@@ -149,7 +172,7 @@ setting.
 2.9 VtrDetachRunner~
 
 Detach the runner pane to its own window while keeping the cursor focus on the
-vim window. This command is useful if there are details in the runner pane or
+Vim window. This command is useful if there are details in the runner pane or
 significant setup implemented in the runner pane that will be useful at a
 later time, but current the runner pane is not needed. Rather than killing the
 runner, this command simply stashes it away in its own window until it is
@@ -202,14 +225,14 @@ Default: 20
 3.2 g:VtrOrientation~
 
 The orientation used when creating the tmux split pane to use as the runner
-pane. The orientation argument is the inverse of vim's, ie "horizontal" splits
+pane. The orientation argument is the inverse of Vim's, ie "horizontal" splits
 in tmux will create a new pane to the right of the existing pane.
 
     let g:VtrOrientation = "h"
 
 Options:
-  "v": vertical (split pane below vim pane)
-  "h": horizontal (split pane to the right of vim pane)
+  "v": vertical (split pane below Vim pane)
+  "h": horizontal (split pane to the right of Vim pane)
 
 Default: "v"
 
@@ -267,7 +290,7 @@ Default: "Command to run: "
 3.6 g:VtrUseVtrMaps~
 
 Allow VTR to define a set of key mappings to provide easy access to the VTR
-command set. As a vim user, I consider my <leader> space to be sacred, so
+command set. As a Vim user, I consider my <leader> space to be sacred, so
 these maps are disabled by default. To allow VTR to set its maps, add the
 following to your vimrc:
 
