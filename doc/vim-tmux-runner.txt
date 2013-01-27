@@ -33,7 +33,6 @@ CONTENTS                                                        *vtr-contents*
         3.9 ................................ |VtrClearOnReattach|
         3.10 ............................... |VtrDetachedName|
         3.11 ............................... |VtrClearSequence|
-        3.12 ............................... |VtrInitTimeout|
 
 ==============================================================================
 ABOUT (1)                                                           *VTR-About*
@@ -366,22 +365,6 @@ insert mode. See the help file, ':help i_Ctrl-v', for more detail.
   let g:VtrClearSequence = ""
 
 Default: ""
-
-------------------------------------------------------------------------------
-                                                               *VtrInitTimeout*
-3.12 g:VtrInitTimeout~
-
-Timeout in milliseconds to use when initializing the runner in temporary
-window. This is intended to provide the runner sufficient time to run the
-initializing commands and then be attached to the Vim window.
-
-This timeout is only relevant if VTR is configured to cd to the git root, or
-run an initial command. These can be set through their respective
-configuration options, |g:VtrGitCdUpOnOpen| and |g:VtrInitialCommand|.
-
-    let g:VtrInitTimeout = 100
-
-Default: 500
 
 ==============================================================================
 vim:tw=78:ts=2:sw=2:expandtab:ft=help:norl:

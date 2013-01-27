@@ -12,29 +12,16 @@ endfunction
 
 function! s:OpenRunnerPane()
     let s:vim_pane = s:ActiveTmuxPaneNumber()
-    let remote_cmd = join(["new-window", "-d", "-n", g:VtrDetachedName])
-    call s:SendTmuxCommand(remote_cmd)
-    let [s:detached_window, s:runner_pane] = [s:LastWindowNumber(), 0]
+    let cmd = join(["split-window -p", s:vtr_percentage, "-".s:vtr_orientation])
+    call s:SendTmuxCommand(cmd)
+    let s:runner_pane = s:ActiveTmuxPaneNumber()
+    call s:FocusVimPane()
     if g:VtrGitCdUpOnOpen
         call s:GitCdUp()
     endif
     if g:VtrInitialCommand != ""
         call s:SendKeys(g:VtrInitialCommand)
     endif
-    if g:VtrInitialCommand || g:VtrGitCdUpOnOpen
-        call s:TimeoutWithProgess()
-    endif
-    call s:ReattachPane()
-endfunction
-
-function! s:TimeoutWithProgess()
-    let timeout_portion = g:VtrInitTimeout / 3
-    echohl String | echon 'Preparing runner.'
-    for time in [1,2,3]
-        execute join(['sleep', timeout_portion.'m'])
-        echon '.'
-    endfor
-    echohl None
 endfunction
 
 function! s:DetachRunnerPane()
@@ -133,12 +120,7 @@ function! s:SendTmuxCommand(command)
 endfunction
 
 function! s:TargetedTmuxCommand(command, target_pane)
-    if exists("s:detached_window")
-        let target = ':'.s:detached_window.'.'.a:target_pane
-    else
-        let target = a:target_pane
-    endif
-    return join([a:command, " -t ", target])
+    return a:command . " -t " . a:target_pane
 endfunction
 
 function! s:_SendKeys(keys)
@@ -381,7 +363,6 @@ function! s:InitializeVariables()
     call s:InitVariable("g:VtrClearOnReorient", 1)
     call s:InitVariable("g:VtrClearOnReattach", 1)
     call s:InitVariable("g:VtrDetachedName", "VTR_Pane")
-    call s:InitVariable("g:VtrInitTimeout", 450)
     call s:InitVariable("g:VtrClearSequence", "")
     let s:vtr_percentage = g:VtrPercentage
     let s:vtr_orientation = g:VtrOrientation
