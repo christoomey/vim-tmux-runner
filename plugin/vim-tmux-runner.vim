@@ -301,6 +301,36 @@ function! s:EnsureRunnerPane()
     endif
 endfunction
 
+" From http://stackoverflow.com/q/1533565/
+" 'how-to-get-visually-selected-text-in-vimscript'
+function! s:GetVisualSelection()
+    normal! gv
+    let [lnum1, col1] = getpos("'<")[1:2]
+    let [lnum2, col2] = getpos("'>")[1:2]
+    let lines = getline(lnum1, lnum2)
+    let lines[-1] = lines[-1][: col2 - 2]
+    let lines[0] = lines[0][col1 - 1:]
+    return join(lines, "\n")
+endfunction
+
+function! s:SendLineToRunner()
+    let line = getline('.')
+    call s:SendTextToRunner(line)
+endfunction
+
+function! s:SendSelectedToRunner()
+    let selected_text = s:GetVisualSelection()
+    call s:SendTextToRunner(selected_text)
+endfunction
+
+function! s:SendTextToRunner(text)
+    let escaped_text = substitute(a:text, "'", "'\\\\''", 'g')
+    call s:SendTmuxCommand(join(["set-buffer", "'" . escaped_text . "'"]))
+    let targeted_cmd = s:TargetedTmuxCommand("paste-buffer", s:runner_pane)
+    call s:SendTmuxCommand(targeted_cmd)
+    call s:SendEnterSequence()
+endfunction
+
 function! VtrSendCommand(command)
     call s:EnsureRunnerPane()
     let escaped_command = shellescape(a:command)
@@ -310,14 +340,16 @@ endfunction
 function! s:DefineCommands()
     command! -nargs=? VtrSendCommandToRunner call s:SendCommandToRunner(<f-args>)
     command! -nargs=? VtrResizeRunner call s:ResizeRunnerPane(<args>)
-    command! VtrOpenRunner :call s:EnsureRunnerPane()
-    command! VtrKillRunner :call s:KillRunnerPane()
-    command! VtrFocusRunner :call s:FocusRunnerPane()
-    command! VtrReorientRunner :call s:ReorientRunner()
-    command! VtrDetachRunner :call s:DetachRunnerPane()
-    command! VtrReattachRunner :call s:ReattachPane()
-    command! VtrClearRunner :call s:SendClearSequence()
-    command! VtrFlushCommand :call s:FlushCommand()
+    command! VtrSendSelectedToRunner call s:SendSelectedToRunner()
+    command! VtrSendLineToRunner call s:SendLineToRunner()
+    command! VtrOpenRunner call s:EnsureRunnerPane()
+    command! VtrKillRunner call s:KillRunnerPane()
+    command! VtrFocusRunner call s:FocusRunnerPane()
+    command! VtrReorientRunner call s:ReorientRunner()
+    command! VtrDetachRunner call s:DetachRunnerPane()
+    command! VtrReattachRunner call s:ReattachPane()
+    command! VtrClearRunner call s:SendClearSequence()
+    command! VtrFlushCommand call s:FlushCommand()
 endfunction
 
 function! s:DefineKeymaps()
@@ -325,6 +357,8 @@ function! s:DefineKeymaps()
         nmap ,rr :VtrResizeRunner<cr>
         nmap ,ror :VtrReorientRunner<cr>
         nmap ,sc :VtrSendCommandToRunner<cr>
+        nmap ,sl :VtrSendLineToRunner<cr>
+        vmap ,sv <Esc>:VtrSendSelectedToRunner<cr>
         nmap ,or :VtrOpenRunner<cr>
         nmap ,kr :VtrKillRunner<cr>
         nmap ,fr :VtrFocusRunner<cr>

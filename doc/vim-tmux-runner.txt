@@ -8,18 +8,18 @@ CONTENTS                                                        *vtr-contents*
 
       1. About............................ |VTR-About|
       2. Usage ........................... |VTR-Usage|
-        2.1 ................................ |VtrOpenRunner|
-        2.2 ................................ |VtrKillRunner|
-        2.1 ................................ |VtrSendCommandToRunner|
-        2.2 ................................ |VtrOpenRunner|
-        2.3 ................................ |VtrKillRunner|
-        2.4 ................................ |VtrFocusRunner|
-        2.5 ................................ |VtrResizeRunner|
-        2.6 ................................ |VtrReorientRunner|
-        2.7 ................................ |VtrDetachRunner|
-        2.8 ................................ |VtrReattachRunner|
-        2.9 ................................ |VtrClearRunner|
-        2.10 ............................... |VtrFlushCommand|
+        2.1  ............................... |VtrSendCommandToRunner|
+        2.2  ............................... |VtrSendLineToRunner|
+        2.3  ............................... |VtrSendSelectedToRunner|
+        2.4  ............................... |VtrOpenRunner|
+        2.5  ............................... |VtrKillRunner|
+        2.6  ............................... |VtrFocusRunner|
+        2.7  ............................... |VtrResizeRunner|
+        2.8  ............................... |VtrReorientRunner|
+        2.9  ............................... |VtrDetachRunner|
+        2.10 ............................... |VtrReattachRunner|
+        2.11 ............................... |VtrClearRunner|
+        2.12 ............................... |VtrFlushCommand|
       3. Configuration ................... |VTR-Configuration|
         3.1 ................................ |VtrPercentage|
         3.2 ................................ |VtrOrientation|
@@ -89,8 +89,20 @@ continue to be used for subsequent calls to the command. The stored command
 can be cleared using |VtrFlushCommand|.
 
 ------------------------------------------------------------------------------
+                                                          *VtrSendLineToRunner*
+2.2 VtrSendLineToRunner~
+
+Send the current line to the runner pane for execution.
+
+------------------------------------------------------------------------------
+                                                      *VtrSendSelectedToRunner*
+2.3 VtrSendSelectedToRunner~
+
+Send the current visual selection to the runner pane for execution.
+
+------------------------------------------------------------------------------
                                                                 *VtrOpenRunner*
-2.2 VtrOpenRunner~
+2.4 VtrOpenRunner~
 
 Open a tmux pane, referred to as the "runner", adjacent to the tmux pane
 containing the current vim session. This command will make use of the
@@ -99,7 +111,7 @@ restore a detached pane or create a new one as needed.
 
 ------------------------------------------------------------------------------
                                                                 *VtrKillRunner*
-2.3 VtrKillRunner~
+2.5 VtrKillRunner~
 
 Kill the tmux runner pane. this pane will kill either the local or detached
 runner pane. this command does nothing if there is currently not a runner
@@ -107,7 +119,7 @@ pane.
 
 ------------------------------------------------------------------------------
                                                                *VtrFocusRunner*
-2.4 VtrFocusRunner~
+2.6 VtrFocusRunner~
 
 Move the cursor to the runner to interact directly with it. A new runner will
 be created if one does not exist and a detached pane will be restored as
@@ -115,7 +127,7 @@ needed.
 
 ------------------------------------------------------------------------------
                                                               *VtrResizeRunner*
-2.5 VtrResizeRunner~
+2.7 VtrResizeRunner~
 
 Prompt for a new percentage then resize the runner pane to that percentage.
 This command will update the |VtrPercentage| setting for the current vim
@@ -125,7 +137,7 @@ with the |VtrClearOnResize| setting.
 
 ------------------------------------------------------------------------------
                                                             *VtrReorientRunner*
-2.6 VtrReorientRunner~
+2.8 VtrReorientRunner~
 
 Switch the runner pane from its current orientation to the alternate
 orientation (horizontal or vertical). The |VtrPercentage| will be maintained
@@ -135,7 +147,7 @@ setting.
 
 ------------------------------------------------------------------------------
                                                               *VtrDetachRunner*
-2.7 VtrDetachRunner~
+2.9 VtrDetachRunner~
 
 Detach the runner pane to its own window while keeping the cursor focus on the
 vim window. This command is useful if there are details in the runner pane or
@@ -148,7 +160,7 @@ needed again. The runner can later be restored with any of |VtrReattachRunner|,
 
 ------------------------------------------------------------------------------
                                                             *VtrReattachRunner*
-2.8 VtrReattachRunner~
+2.10 VtrReattachRunner~
 
 Reattach the runner pane. This command assumes that the runner has previously
 been dismissed using the |VtrDetachRunner| command. The pane will be restored
@@ -158,7 +170,7 @@ behavior can be disabled using the |VtrClearOnReattach| setting.
 
 ------------------------------------------------------------------------------
                                                                *VtrClearRunner*
-2.9 VtrClearRunner~
+2.11 VtrClearRunner~
 
 Send the key sequence defined by the |VtrClearSequence| setting to the runner.
 By default this will clear any unfinished commands at the shell prompt and
@@ -166,7 +178,7 @@ move the prompt up to hide any previous command output.
 
 ------------------------------------------------------------------------------
                                                               *VtrFlushCommand*
-2.10 VtrFlushCommand~
+2.12 VtrFlushCommand~
 
 Flush the previous run command variable. After running this command, the next
 run of |VtrSendCommandToRunner| will again prompt for the command to run.
@@ -262,20 +274,28 @@ following to your vimrc:
 
   let g:VtrUseVtrMaps = 1
 
-The map set provided by VTR is:
+The following normal mode maps are provided when g:VtrUseVtrMaps is set to 1:
 
         Mapping      |   Command
         -----------------------------
-        <leader>rr   |   VtrResizeRunner
-        <leader>ror  |   VtrReorientRunner
-        <leader>sc   |   VtrSendCommandToRunner
-        <leader>or   |   VtrOpenRunner
-        <leader>kr   |   VtrKillRunner
-        <leader>fr   |   VtrFocusRunner
-        <leader>dr   |   VtrDetachRunner
-        <leader>ar   |   VtrReattachRunner
-        <leader>cr   |   VtrClearRunner
-        <leader>fc   |   VtrFlushCommand
+        <leader>rr   |   VtrResizeRunner<cr>
+        <leader>ror  |   VtrReorientRunner<cr>
+        <leader>sc   |   VtrSendCommandToRunner<cr>
+        <leader>sl   |   VtrSendLineToRunner<cr>
+        <leader>or   |   VtrOpenRunner<cr>
+        <leader>kr   |   VtrKillRunner<cr>
+        <leader>fr   |   VtrFocusRunner<cr>
+        <leader>dr   |   VtrDetachRunner<cr>
+        <leader>ar   |   VtrReattachRunner<cr>
+        <leader>cr   |   VtrClearRunner<cr>
+        <leader>fc   |   VtrFlushCommand<cr>
+
+In addition, a single visual mode map is provided to send a visually selected
+region to the runner pane:
+
+        Mapping      |   Command
+        -----------------------------
+        <leader>sv   |   VtrSendSelectedToRunner<cr>
 
 Default: 0
 
