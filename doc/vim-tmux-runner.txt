@@ -123,13 +123,13 @@ pane to override the defaults. This can be used to create context specific
 runner panes with sizing and orientation that is relevant for that use case.
 
 Script runner:
-  VtrOpenRunner {'orientation': 'h', 'percent': 50}
+  VtrOpenRunner {'orientation': 'h', 'percentage': 50}
 
 Test runner:
-  VtrOpenRunner {'orientation': 'v', 'percent': 20}
+  VtrOpenRunner {'orientation': 'v', 'percentage': 20}
 
 Ruby Repl:
-  VtrOpenRunner {'orientation': 'h', 'percent': 50, 'cmd': 'irb'}
+  VtrOpenRunner {'orientation': 'h', 'percentage': 50, 'cmd': 'irb'}
 
 ------------------------------------------------------------------------------
                                                                 *VtrKillRunner*
