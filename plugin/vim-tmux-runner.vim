@@ -330,6 +330,10 @@ function! s:SendTextToRunner(text)
     call s:SendEnterSequence()
 endfunction
 
+function! s:SendCtrlD()
+  call s:SendKeys('')
+endfunction
+
 function! VtrSendCommand(command)
     call s:EnsureRunnerPane()
     let escaped_command = shellescape(a:command)
@@ -349,6 +353,7 @@ function! s:DefineCommands()
     command! VtrReattachRunner call s:ReattachPane()
     command! VtrClearRunner call s:SendClearSequence()
     command! VtrFlushCommand call s:FlushCommand()
+    command! VtrSendCtrlD call s:SendCtrlD()
 endfunction
 
 function! s:DefineKeymaps()

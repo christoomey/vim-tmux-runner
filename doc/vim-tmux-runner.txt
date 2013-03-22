@@ -20,6 +20,7 @@ CONTENTS                                                        *vtr-contents*
         2.10 ............................... |VtrReattachRunner|
         2.11 ............................... |VtrClearRunner|
         2.12 ............................... |VtrFlushCommand|
+        2.13 ............................... |VtrSendCtrlD|
       3. Configuration ................... |VTR-Configuration|
         3.1 ................................ |VtrPercentage|
         3.2 ................................ |VtrOrientation|
@@ -204,6 +205,14 @@ move the prompt up to hide any previous command output.
 
 Flush the previous run command variable. After running this command, the next
 run of |VtrSendCommandToRunner| will again prompt for the command to run.
+
+------------------------------------------------------------------------------
+                                                                 *VtrSendCtrlD*
+2.12 VtrSendCtrlD~
+
+Send Ctrl-D key sequence to the runner without resetting the current command.
+This is useful if you are repeatedly running a script in the debugger and
+regularly need to kill the repl.
 
 ==============================================================================
 CONFIGURATION (3)                                           *VTR-Configuration*
