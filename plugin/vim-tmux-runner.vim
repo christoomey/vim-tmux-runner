@@ -309,23 +309,25 @@ function! s:GetVisualSelection()
     let lines = getline(lnum1, lnum2)
     let lines[-1] = lines[-1][: col2 - 2]
     let lines[0] = lines[0][col1 - 1:]
-    return join(lines, "\n")
+    return lines
 endfunction
 
 function! s:SendLineToRunner()
-    let line = getline('.')
+    let line = [getline('.')]
     call s:SendTextToRunner(line)
 endfunction
 
 function! s:SendSelectedToRunner()
-    let selected_text = s:GetVisualSelection()
-    call s:SendTextToRunner(selected_text)
+    let lines = s:GetVisualSelection()
+    call s:SendTextToRunner(lines)
 endfunction
 
-function! s:SendTextToRunner(text)
-    let escaped_text = substitute(a:text, "'", "'\\\\''", 'g')
-    call s:SendTmuxCommand(join(["set-buffer", "'" . escaped_text . "'"]))
-    let targeted_cmd = s:TargetedTmuxCommand("paste-buffer", s:runner_pane)
+function! s:SendTextToRunner(lines)
+    let whitespace_stripped = map(a:lines, 'substitute(v:val,"^\\s*","","")')
+    let without_empty_lines = filter(whitespace_stripped, "!empty(v:val)")
+    let joined_lines = join(without_empty_lines, "\r")
+    let send_keys_cmd = s:TargetedTmuxCommand("send-keys", s:runner_pane)
+    let targeted_cmd = send_keys_cmd . ' ' . shellescape(joined_lines)
     call s:SendTmuxCommand(targeted_cmd)
     call s:SendEnterSequence()
 endfunction
