@@ -325,11 +325,10 @@ endfunction
 function! s:SendTextToRunner(lines)
     let whitespace_stripped = map(a:lines, 'substitute(v:val,"^\\s*","","")')
     let without_empty_lines = filter(whitespace_stripped, "!empty(v:val)")
-    let joined_lines = join(without_empty_lines, "\r")
+    let joined_lines = join(without_empty_lines, "\r") . "\r"
     let send_keys_cmd = s:TargetedTmuxCommand("send-keys", s:runner_pane)
     let targeted_cmd = send_keys_cmd . ' ' . shellescape(joined_lines)
     call s:SendTmuxCommand(targeted_cmd)
-    call s:SendEnterSequence()
 endfunction
 
 function! s:SendCtrlD()
