@@ -200,6 +200,26 @@ function! s:_ReattachPane()
     let s:runner_pane = s:ActiveTmuxPaneNumber()
 endfunction
 
+function! s:AttachToPane()
+  if g:VtrDisplayPaneNumbers
+    call s:SendTmuxCommand('source ~/.tmux.conf && tmux display-panes')
+  endif
+  echohl String | let desired_pane = input('Pane #: ') | echohl None
+  let desired_pane = str2nr(desired_pane)
+  if s:ValidRunnerPaneNumber(desired_pane)
+    let s:runner_pane = desired_pane
+    echohl String | echo "\rRunner pane set to: " . desired_pane | echohl None
+  else
+    echohl ErrorMsg | echo "\rInvalid pane number: " . desired_pane | echohl None
+  endif
+endfunction
+
+function! s:ValidRunnerPaneNumber(desired_pane)
+  if a:desired_pane == s:ActiveTmuxPaneNumber() | return 0 | endif
+  if a:desired_pane > len(s:TmuxPanes()) | return 0 | endif
+  return 1
+endfunction
+
 function! s:ReattachPane()
     if !s:RequireDetachedPane()
         return
@@ -355,6 +375,7 @@ function! s:DefineCommands()
     command! VtrClearRunner call s:SendClearSequence()
     command! VtrFlushCommand call s:FlushCommand()
     command! VtrSendCtrlD call s:SendCtrlD()
+    command! VtrAttachToPane call s:AttachToPane()
 endfunction
 
 function! s:DefineKeymaps()
@@ -387,6 +408,7 @@ function! s:InitializeVariables()
     call s:InitVariable("g:VtrClearOnReattach", 1)
     call s:InitVariable("g:VtrDetachedName", "VTR_Pane")
     call s:InitVariable("g:VtrClearSequence", "")
+    call s:InitVariable("g:VtrDisplayPaneNumbers", 1)
     let s:vtr_percentage = g:VtrPercentage
     let s:vtr_orientation = g:VtrOrientation
 endfunction
