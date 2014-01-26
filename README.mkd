@@ -37,6 +37,27 @@ cd bundles
 git clone https://github.com/christoomey/vim-tmux-runner.git
 ```
 
+## Python Notes
+
+If you are using python, or any other language with syntactic whitespace, you
+will likely want to change the following settings to better support the
+required whitespace:
+
+``` vim
+let g:VtrStripLeadingWhitespace = 0
+let g:VtrClearEmptyLines = 0
+let g:VtrAppendNewline = 1
+```
+
+Additionally, if you are using ipython, you will need to ensure it is
+installed with proper readline support. Ref [this Stack Overflow thread][] and
+answer for more detail.
+
+You will also need to start ipython with auto-indentation disabled, which can
+be done with the following `ipython --no-autoindent`.
+
+[this Stack Overflow thread]: http://stackoverflow.com/a/1840304/2751777
+
 ## Development Status
 
 This plugin is currently very much an alpha. Although the major features are

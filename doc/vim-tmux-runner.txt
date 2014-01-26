@@ -34,6 +34,9 @@ CONTENTS                                                        *vtr-contents*
         3.9 ................................ |VtrClearOnReattach|
         3.10 ............................... |VtrDetachedName|
         3.11 ............................... |VtrClearSequence|
+        3.12 ............................... |VtrStripLeadningWhitespace|
+        3.13 ............................... |VtrClearEmptyLines|
+        3.14 ............................... |VtrAppendNewline|
 
 ==============================================================================
 ABOUT (1)                                                           *VTR-About*
@@ -397,6 +400,48 @@ insert mode. See the help file, ':help i_Ctrl-v', for more detail.
   let g:VtrClearSequence = ""
 
 Default: ""
+
+------------------------------------------------------------------------------
+                                                   *VtrStripLeadningWhitespace*
+
+3.12 g:VtrStripLeadingWhitespace~
+
+When interacting with most REPLs, indentation will automatically be added to
+the beginning of lines based on the syntax. The setting causes VTR to strip
+leading whitespace before sending lines to avoid doubly indented lines.
+
+By default this setting is enabled, but if you are using a language with
+syntactic whitespace like python or coffeescript then you will likely want to
+disable this setting.
+
+  let g:VtrStripLeadingWhitespace = 0
+
+Default: 1
+
+------------------------------------------------------------------------------
+                                                           *VtrClearEmptyLines*
+
+3.13 g:VtrClearEmptyLines~
+
+VTR will clear out empty lines in visually selected regions to avoid clutter in
+the REPLs. If the blank lines are relevant, you can disable this behavior.
+
+  let g:VtrClearEmptyLines = 0
+
+Default: 1
+
+------------------------------------------------------------------------------
+                                                             *VtrAppendNewline*
+
+3.14 g:VtrAppendNewline
+
+If you are using python or any language with syntactic whitespace, an empty
+line might be needed to close the preceding context. To enable appending a new
+line to any multi line send, use the following setting.
+
+  let g:VtrAppendNewline = 1
+
+Default: 0
 
 ==============================================================================
 vim:tw=78:ts=2:sw=2:expandtab:ft=help:norl:

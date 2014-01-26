@@ -342,10 +342,23 @@ function! s:SendSelectedToRunner()
     call s:SendTextToRunner(lines)
 endfunction
 
+function! s:PrepareLines(lines)
+    let prepared = a:lines
+    if g:VtrStripLeadingWhitespace
+        let prepared = map(a:lines, 'substitute(v:val,"^\\s*","","")')
+    endif
+    if g:VtrClearEmptyLines
+        let prepared = filter(prepared, "!empty(v:val)")
+    endif
+    if g:VtrAppendNewline && len(a:lines) > 1
+        let prepared = add(prepared, "\r")
+    endif
+    return prepared
+endfunction
+
 function! s:SendTextToRunner(lines)
-    let whitespace_stripped = map(a:lines, 'substitute(v:val,"^\\s*","","")')
-    let without_empty_lines = filter(whitespace_stripped, "!empty(v:val)")
-    let joined_lines = join(without_empty_lines, "\r") . "\r"
+    let prepared = s:PrepareLines(a:lines)
+    let joined_lines = join(prepared, "\r") . "\r"
     let send_keys_cmd = s:TargetedTmuxCommand("send-keys", s:runner_pane)
     let targeted_cmd = send_keys_cmd . ' ' . shellescape(joined_lines)
     call s:SendTmuxCommand(targeted_cmd)
@@ -409,6 +422,9 @@ function! s:InitializeVariables()
     call s:InitVariable("g:VtrDetachedName", "VTR_Pane")
     call s:InitVariable("g:VtrClearSequence", "")
     call s:InitVariable("g:VtrDisplayPaneNumbers", 1)
+    call s:InitVariable("g:VtrStripLeadingWhitespace", 1)
+    call s:InitVariable("g:VtrClearEmptyLines", 1)
+    call s:InitVariable("g:VtrAppendNewline", 0)
     let s:vtr_percentage = g:VtrPercentage
     let s:vtr_orientation = g:VtrOrientation
 endfunction
