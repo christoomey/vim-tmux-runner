@@ -227,6 +227,11 @@ This will cause the runner pane to temporarily occupy the entire tmux window.
 This is useful for temporarily viewing the pane in a larger context, ie to see
 a long bracktrace.
 
+You can add the following mapping to your ~/.tmux.conf file to enable quick
+toggling of the zoom functionality:
+
+  bind C-p run "(tmux display-message -p '#{pane_current_command}' | grep -iqE '(^|\/)vim$' && tmux send-keys ':VtrZoomRunnerPane' 'C-m') || tmux select-pane -l"
+
 ==============================================================================
 CONFIGURATION (3)                                           *VTR-Configuration*
 

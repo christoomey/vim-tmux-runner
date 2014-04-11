@@ -400,18 +400,18 @@ endfunction
 
 function! s:DefineKeymaps()
     if g:VtrUseVtrMaps
-        nmap ,rr :VtrResizeRunner<cr>
-        nmap ,ror :VtrReorientRunner<cr>
-        nmap ,sc :VtrSendCommandToRunner<cr>
-        nmap ,sl :VtrSendLineToRunner<cr>
-        vmap ,sv <Esc>:VtrSendSelectedToRunner<cr>
-        nmap ,or :VtrOpenRunner<cr>
-        nmap ,kr :VtrKillRunner<cr>
-        nmap ,fr :VtrFocusRunner<cr>
-        nmap ,dr :VtrDetachRunner<cr>
-        nmap ,cr :VtrClearRunner<cr>
-        nmap ,fc :VtrFlushCommand<cr>
-        nmap ,zr :VtrZoomRunnerPane<cr>
+        nmap <leader>rr :VtrResizeRunner<cr>
+        nmap <leader>ror :VtrReorientRunner<cr>
+        nmap <leader>sc :VtrSendCommandToRunner<cr>
+        nmap <leader>sl :VtrSendLineToRunner<cr>
+        vmap <leader>sv <Esc>:VtrSendSelectedToRunner<cr>
+        nmap <leader>or :VtrOpenRunner<cr>
+        nmap <leader>kr :VtrKillRunner<cr>
+        nmap <leader>fr :VtrFocusRunner<cr>
+        nmap <leader>dr :VtrDetachRunner<cr>
+        nmap <leader>cr :VtrClearRunner<cr>
+        nmap <leader>fc :VtrFlushCommand<cr>
+        nmap <leader>zr :VtrZoomRunnerPane<cr>
     endif
 endfunction
 
