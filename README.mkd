@@ -26,7 +26,7 @@ VTR, check [the included doc file][].
 
 ## Installation
 
-The easiest way to install VTR is to add the git repo as a bundle, then use 
+The easiest way to install VTR is to add the git repo as a bundle, then use
 [Pathogen][], [Vundle][] or similar plugin management option to add it to Vim's
 runtime path.
 

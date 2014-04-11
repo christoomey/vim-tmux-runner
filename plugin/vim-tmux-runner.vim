@@ -127,6 +127,12 @@ function! s:FocusRunnerPane()
     call s:FocusTmuxPane(s:runner_pane)
 endfunction
 
+function! s:ZoomRunnerPane()
+  call s:EnsureRunnerPane()
+  let targeted_cmd = s:TargetedTmuxCommand("resize-pane -Z", s:runner_pane)
+  call s:SendTmuxCommand(targeted_cmd)
+endfunction
+
 function! s:SendTmuxCommand(command)
     let prefixed_command = "tmux " . a:command
     return system(prefixed_command)
@@ -389,6 +395,7 @@ function! s:DefineCommands()
     command! VtrFlushCommand call s:FlushCommand()
     command! VtrSendCtrlD call s:SendCtrlD()
     command! VtrAttachToPane call s:AttachToPane()
+    command! VtrZoomRunnerPane call s:ZoomRunnerPane()
 endfunction
 
 function! s:DefineKeymaps()
@@ -402,9 +409,9 @@ function! s:DefineKeymaps()
         nmap ,kr :VtrKillRunner<cr>
         nmap ,fr :VtrFocusRunner<cr>
         nmap ,dr :VtrDetachRunner<cr>
-        nmap ,ar :VtrReattachRunner<cr>
         nmap ,cr :VtrClearRunner<cr>
         nmap ,fc :VtrFlushCommand<cr>
+        nmap ,zr :VtrZoomRunnerPane<cr>
     endif
 endfunction
 
