@@ -129,8 +129,10 @@ endfunction
 
 function! s:ZoomRunnerPane()
   call s:EnsureRunnerPane()
-  let targeted_cmd = s:TargetedTmuxCommand("resize-pane -Z", s:runner_pane)
-  call s:SendTmuxCommand(targeted_cmd)
+  let copy_mode_cmd = s:TargetedTmuxCommand("copy-mode", s:runner_pane)
+  let resize_cmd = s:TargetedTmuxCommand("resize-pane -Z", s:runner_pane)
+  call s:SendTmuxCommand(copy_mode_cmd)
+  call s:SendTmuxCommand(resize_cmd)
 endfunction
 
 function! s:SendTmuxCommand(command)
