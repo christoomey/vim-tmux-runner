@@ -276,7 +276,7 @@ No command will be run if this is set to an empty string.
 Default: ""
 
 ------------------------------------------------------------------------------
-                                                            *VtrInitialCommand*
+                                                             *VtrGitCdUpOnOpen*
 3.4 g:VtrGitCdUpOnOpen~
 
 When opening a new runner, if currently within a git repo then change the
@@ -284,7 +284,7 @@ working directory to the root of the git repo. This can be useful for some
 test runners which behave differently depending on where they are run from. By
 default this functionality is disabled.
 
-  let g:VtrInitialCommand = 1
+  let g:VtrGitCdUpOnOpen = 1
 
 Default: 0
 
