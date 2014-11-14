@@ -48,7 +48,7 @@ endfunction
 
 function! s:RequireRunnerPane()
     if !exists("s:runner_pane")
-        echohl ErrorMsg | echom "VTR: No runner pane attached." | echohl None
+        call s:EchoError("VTR: No runner pane attached.")
         return 0
     endif
     return 1
@@ -56,7 +56,7 @@ endfunction
 
 function! s:RequireDetachedPane()
     if !exists("s:detached_window")
-        echohl ErrorMsg | echom "VTR: No detached runner pane." | echohl None
+        call s:EchoError("VTR: No detached runner pane.")
         return 0
     endif
     return 1
@@ -64,7 +64,7 @@ endfunction
 
 function! s:RequireLocalPaneOrDetached()
     if !exists('s:detached_window') && !exists('s:runner_pane')
-        echohl ErrorMsg | echom "VTR: No pane, local or detached." | echohl None
+        call s:EchoError("VTR: No pane, local or detached.")
         return 0
     endif
     return 1
@@ -209,18 +209,29 @@ function! s:_ReattachPane()
     let s:runner_pane = s:ActiveTmuxPaneNumber()
 endfunction
 
-function! s:AttachToPane()
+function! s:PromptForRunnerToAttach()
   if g:VtrDisplayPaneNumbers
     call s:SendTmuxCommand('source ~/.tmux.conf && tmux display-panes')
   endif
   echohl String | let desired_pane = input('Pane #: ') | echohl None
-  let desired_pane = str2nr(desired_pane)
-  if s:ValidRunnerPaneNumber(desired_pane)
-    let s:runner_pane = desired_pane
-    echohl String | echo "\rRunner pane set to: " . desired_pane | echohl None
+  if desired_pane != ''
+    call s:AttachToPane(str2nr(desired_pane))
   else
-    echohl ErrorMsg | echo "\rInvalid pane number: " . desired_pane | echohl None
+    call s:EchoError("No pane specified. Cancelling.")
   endif
+endfunction
+
+function! s:AttachToPane(desired_pane)
+  if s:ValidRunnerPaneNumber(a:desired_pane)
+    let s:runner_pane = a:desired_pane
+    echohl String | echo "\rRunner pane set to: " . a:desired_pane | echohl None
+  else
+    call s:EchoError("Invalid pane number: " . a:desired_pane)
+  endif
+endfunction
+
+function! s:EchoError(message)
+  echohl ErrorMsg | echo "\r". a:message | echohl None
 endfunction
 
 function! s:ValidRunnerPaneNumber(desired_pane)
@@ -305,7 +316,7 @@ function! s:SendCommandToRunner(...)
     let escaped_empty_string = "''"
     if s:user_command == escaped_empty_string
         unlet s:user_command
-        echohl ErrorMsg | echom "VTR: command string required" | echohl None
+        call s:EchoError("VTR: command string required")
         return
     endif
     call s:EnsureRunnerPane()
@@ -397,7 +408,7 @@ function! s:DefineCommands()
     command! VtrClearRunner call s:SendClearSequence()
     command! VtrFlushCommand call s:FlushCommand()
     command! VtrSendCtrlD call s:SendCtrlD()
-    command! VtrAttachToPane call s:AttachToPane()
+    command! VtrAttachToPane call s:PromptForRunnerToAttach()
     command! VtrZoomRunnerPane call s:ZoomRunnerPane()
 endfunction
 
