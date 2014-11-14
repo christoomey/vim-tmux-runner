@@ -1,6 +1,3 @@
-" TODO: maximize command
-" TODO: open pane in other window, then copy in (avoid flickering during init)
-
 function! s:InitVariable(var, value)
     if !exists(a:var)
         let escaped_value = substitute(a:value, "'", "''", "g")
@@ -414,18 +411,19 @@ endfunction
 
 function! s:DefineKeymaps()
     if g:VtrUseVtrMaps
-        nmap <leader>rr :VtrResizeRunner<cr>
-        nmap <leader>ror :VtrReorientRunner<cr>
-        nmap <leader>sc :VtrSendCommandToRunner<cr>
-        nmap <leader>sl :VtrSendLineToRunner<cr>
-        vmap <leader>sv <Esc>:VtrSendSelectedToRunner<cr>
-        nmap <leader>or :VtrOpenRunner<cr>
-        nmap <leader>kr :VtrKillRunner<cr>
-        nmap <leader>fr :VtrFocusRunner<cr>
-        nmap <leader>dr :VtrDetachRunner<cr>
-        nmap <leader>cr :VtrClearRunner<cr>
-        nmap <leader>fc :VtrFlushCommand<cr>
-        nmap <leader>zr :VtrZoomRunnerPane<cr>
+        nnoremap <leader>va :VtrAttachToPane<cr>
+        nnoremap <leader>rr :VtrResizeRunner<cr>
+        nnoremap <leader>ror :VtrReorientRunner<cr>
+        nnoremap <leader>sc :VtrSendCommandToRunner<cr>
+        nnoremap <leader>sl :VtrSendLineToRunner<cr>
+        nnoremap <leader>sv <Esc>:VtrSendSelectedToRunner<cr>
+        nnoremap <leader>or :VtrOpenRunner<cr>
+        nnoremap <leader>kr :VtrKillRunner<cr>
+        nnoremap <leader>fr :VtrFocusRunner<cr>
+        nnoremap <leader>dr :VtrDetachRunner<cr>
+        nnoremap <leader>cr :VtrClearRunner<cr>
+        nnoremap <leader>fc :VtrFlushCommand<cr>
+        nnoremap <leader>zr :VtrZoomRunnerPane<cr>
     endif
 endfunction
 
