@@ -125,6 +125,7 @@ endfunction
 function! s:FocusRunnerPane()
     call s:EnsureRunnerPane()
     call s:FocusTmuxPane(s:runner_pane)
+    call s:SendTmuxCommand("resize-pane -Z")
 endfunction
 
 function! s:ZoomRunnerPane()
