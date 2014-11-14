@@ -374,6 +374,7 @@ function! s:PrepareLines(lines)
 endfunction
 
 function! s:SendTextToRunner(lines)
+    call s:EnsureRunnerPane()
     let prepared = s:PrepareLines(a:lines)
     let joined_lines = join(prepared, "\r") . "\r"
     let send_keys_cmd = s:TargetedTmuxCommand("send-keys", s:runner_pane)
