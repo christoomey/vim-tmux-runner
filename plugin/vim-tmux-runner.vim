@@ -68,9 +68,13 @@ function! s:RequireLocalPaneOrDetached()
 endfunction
 
 function! s:KillLocalRunner()
-    let targeted_cmd = s:TargetedTmuxCommand("kill-pane", s:runner_pane)
-    call s:SendTmuxCommand(targeted_cmd)
-    unlet s:runner_pane
+    if s:runner_pane == s:ActiveTmuxPaneNumber()
+      call s:EchoError("RunnerPane is set to current pane. Cancelling")
+    else
+      let targeted_cmd = s:TargetedTmuxCommand("kill-pane", s:runner_pane)
+      call s:SendTmuxCommand(targeted_cmd)
+      unlet s:runner_pane
+    endif
 endfunction
 
 function! s:KillDetachedWindow()
@@ -91,11 +95,7 @@ function! s:KillRunnerPane()
 endfunction
 
 function! s:ActiveTmuxPaneNumber()
-    for pane_title in s:TmuxPanes()
-        if pane_title =~ '\(active\)'
-            return pane_title[0]
-        endif
-    endfor
+  return s:SendTmuxCommand("display-message -p \"#{pane_index}\"")
 endfunction
 
 function! s:TmuxPanes()
@@ -133,9 +133,13 @@ function! s:ZoomRunnerPane()
   call s:SendTmuxCommand(resize_cmd)
 endfunction
 
+function! s:Strip(string)
+    return substitute(a:string, '^\s*\(.\{-}\)\s*$', '\1', '')
+endfunction
+
 function! s:SendTmuxCommand(command)
     let prefixed_command = "tmux " . a:command
-    return system(prefixed_command)
+    return s:Strip(system(prefixed_command))
 endfunction
 
 function! s:TargetedTmuxCommand(command, target_pane)
