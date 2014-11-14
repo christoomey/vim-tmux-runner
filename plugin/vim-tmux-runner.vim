@@ -21,10 +21,10 @@ function! s:CreateRunnerPane(...)
         let s:vtr_percentage = s:DictFetch(a:1, 'percentage', s:vtr_percentage)
         let g:VtrInitialCommand = s:DictFetch(a:1, 'cmd', g:VtrInitialCommand)
     endif
-    let s:vim_pane = s:ActiveTmuxPaneNumber()
+    let s:vim_pane = s:ActivePaneIndex()
     let cmd = join(["split-window -p", s:vtr_percentage, "-".s:vtr_orientation])
     call s:SendTmuxCommand(cmd)
-    let s:runner_pane = s:ActiveTmuxPaneNumber()
+    let s:runner_pane = s:ActivePaneIndex()
     call s:FocusVimPane()
     if g:VtrGitCdUpOnOpen
         call s:GitCdUp()
@@ -68,7 +68,7 @@ function! s:RequireLocalPaneOrDetached()
 endfunction
 
 function! s:KillLocalRunner()
-    if s:runner_pane == s:ActiveTmuxPaneNumber()
+    if s:runner_pane == s:ActivePaneIndex()
       call s:EchoError("RunnerPane is set to current pane. Cancelling")
     else
       let targeted_cmd = s:TargetedTmuxCommand("kill-pane", s:runner_pane)
@@ -94,7 +94,7 @@ function! s:KillRunnerPane()
     endif
 endfunction
 
-function! s:ActiveTmuxPaneNumber()
+function! s:ActivePaneIndex()
   return s:SendTmuxCommand("display-message -p \"#{pane_index}\"")
 endfunction
 
@@ -134,7 +134,7 @@ function! s:ZoomRunnerPane()
 endfunction
 
 function! s:Strip(string)
-    return substitute(a:string, '^\s*\(.\{-}\)\s*$', '\1', '')
+    return substitute(a:string, '^\s*\(.\{-}\)\s*\n\?$', '\1', '')
 endfunction
 
 function! s:SendTmuxCommand(command)
@@ -207,18 +207,49 @@ function! s:_ReattachPane()
         \ s:RunnerDimensionSpec()])
     call s:SendTmuxCommand(join_cmd)
     unlet s:detached_window
-    let s:runner_pane = s:ActiveTmuxPaneNumber()
+    let s:runner_pane = s:ActivePaneIndex()
+endfunction
+
+function! s:TmuxInfo(message)
+  " TODO: this should accept optional target pane, default to current.
+  " Pass that to TargetedCommand as "display-message", "-p '#{...}')
+  return s:SendTmuxCommand("display-message -p '#{" . a:message . "}'")
+endfunction
+
+function! s:PaneCount()
+  return str2nr(s:TmuxInfo('window_panes'))
+endfunction
+
+function! s:PaneIndices()
+  let index_slicer = 'str2nr(substitute(v:val, "\\v(\\d+):.*", "\\1", ""))'
+  return map(s:TmuxPanes(), index_slicer)
+endfunction
+
+function! s:AvailableRunnerPaneIndices()
+  return filter(s:PaneIndices(), "v:val != " . s:ActivePaneIndex())
+endfunction
+
+function! s:AltPane()
+  if s:PaneCount() == 2
+    return s:AvailableRunnerPaneIndices()[0]
+  else
+    echoerr "VTR: AltPane only valid if two panes open"
+  endif
 endfunction
 
 function! s:PromptForRunnerToAttach()
-  if g:VtrDisplayPaneNumbers
-    call s:SendTmuxCommand('source ~/.tmux.conf && tmux display-panes')
-  endif
-  echohl String | let desired_pane = input('Pane #: ') | echohl None
-  if desired_pane != ''
-    call s:AttachToPane(str2nr(desired_pane))
+  if s:PaneCount() == 2
+    call s:AttachToPane(s:AltPane())
   else
-    call s:EchoError("No pane specified. Cancelling.")
+    if g:VtrDisplayPaneNumbers
+      call s:SendTmuxCommand('source ~/.tmux.conf && tmux display-panes')
+    endif
+    echohl String | let desired_pane = input('Pane #: ') | echohl None
+    if desired_pane != ''
+      call s:AttachToPane(str2nr(desired_pane))
+    else
+      call s:EchoError("No pane specified. Cancelling.")
+    endif
   endif
 endfunction
 
@@ -236,8 +267,8 @@ function! s:EchoError(message)
 endfunction
 
 function! s:ValidRunnerPaneNumber(desired_pane)
-  if a:desired_pane == s:ActiveTmuxPaneNumber() | return 0 | endif
-  if a:desired_pane > len(s:TmuxPanes()) | return 0 | endif
+  if a:desired_pane == s:ActivePaneIndex() | return 0 | endif
+  if a:desired_pane > (s:PaneCount() - 1) | return 0 | endif
   return 1
 endfunction
 
