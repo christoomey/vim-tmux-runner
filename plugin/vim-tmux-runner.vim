@@ -372,26 +372,8 @@ function! s:EnsureRunnerPane(...)
     endif
 endfunction
 
-" From http://stackoverflow.com/q/1533565/
-" 'how-to-get-visually-selected-text-in-vimscript'
-function! s:GetVisualSelection()
-    normal! gv
-    let [lnum1, col1] = getpos("'<")[1:2]
-    let [lnum2, col2] = getpos("'>")[1:2]
-    let lines = getline(lnum1, lnum2)
-    let lines[-1] = lines[-1][: col2 - 2]
-    let lines[0] = lines[0][col1 - 1:]
-    return lines
-endfunction
-
-function! s:SendLineToRunner()
-    let line = [getline('.')]
-    call s:SendTextToRunner(line)
-endfunction
-
-function! s:SendSelectedToRunner()
-    let lines = s:GetVisualSelection()
-    call s:SendTextToRunner(lines)
+function! s:SendLinesToRunner() range
+    call s:SendTextToRunner(getline(a:firstline, a:lastline))
 endfunction
 
 function! s:PrepareLines(lines)
@@ -431,8 +413,7 @@ function! s:DefineCommands()
     command! -nargs=? VtrSendCommandToRunner call s:SendCommandToRunner(<f-args>)
     command! -nargs=? VtrResizeRunner call s:ResizeRunnerPane(<args>)
     command! -nargs=? VtrOpenRunner call s:EnsureRunnerPane(<args>)
-    command! VtrSendSelectedToRunner call s:SendSelectedToRunner()
-    command! VtrSendLineToRunner call s:SendLineToRunner()
+    command! -range VtrSendLinesToRunner <line1>,<line2>call s:SendLinesToRunner()
     command! VtrKillRunner call s:KillRunnerPane()
     command! VtrFocusRunner call s:FocusRunnerPane()
     command! VtrReorientRunner call s:ReorientRunner()
@@ -451,8 +432,8 @@ function! s:DefineKeymaps()
         nnoremap <leader>rr :VtrResizeRunner<cr>
         nnoremap <leader>ror :VtrReorientRunner<cr>
         nnoremap <leader>sc :VtrSendCommandToRunner<cr>
-        nnoremap <leader>sl :VtrSendLineToRunner<cr>
-        nnoremap <leader>sv <Esc>:VtrSendSelectedToRunner<cr>
+        nnoremap <leader>sl :VtrSendLinesToRunner<cr>
+        vnoremap <leader>sl :VtrSendLinesToRunner<cr>
         nnoremap <leader>or :VtrOpenRunner<cr>
         nnoremap <leader>kr :VtrKillRunner<cr>
         nnoremap <leader>fr :VtrFocusRunner<cr>
