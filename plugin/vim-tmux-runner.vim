@@ -128,9 +128,9 @@ endfunction
 function! s:ZoomRunnerPane()
   call s:EnsureRunnerPane()
   let copy_mode_cmd = s:TargetedTmuxCommand("copy-mode", s:runner_pane)
-  let resize_cmd = s:TargetedTmuxCommand("resize-pane -Z", s:runner_pane)
+  let zoom_command = s:TargetedTmuxCommand("resize-pane -Z", s:runner_pane)
   call s:SendTmuxCommand(copy_mode_cmd)
-  call s:SendTmuxCommand(resize_cmd)
+  call s:SendTmuxCommand(zoom_command)
 endfunction
 
 function! s:Strip(string)
@@ -307,37 +307,6 @@ function! s:FlushCommand()
     endif
 endfunction
 
-function! s:ResizeRunnerPane(...)
-    if !s:RequireRunnerPane()
-        return
-    endif
-    if exists("a:1") && a:1 != ""
-        let new_percent = shellescape(a:1)
-    else
-        let new_percent = s:HighlightedPrompt("Runner screen percentage: ")
-    endif
-    let pane_dimensions =  s:RunnerPaneDimensions()
-    let expand = (eval(join([new_percent, '>', s:vtr_percentage])))
-    if s:vtr_orientation == "v"
-        let relevant_dimension = pane_dimensions['height']
-        let direction = expand ? '-U' : '-D'
-    else
-        let relevant_dimension = pane_dimensions['width']
-        let direction = expand ? '-L' : '-R'
-    endif
-    let inputs = [relevant_dimension, '*', new_percent,
-        \ '/',  s:vtr_percentage]
-    let new_lines = eval(join(inputs)) " Not sure why I need to use eval...?
-    let lines_delta = abs(relevant_dimension - new_lines)
-    let targeted_cmd = s:TargetedTmuxCommand("resize-pane", s:runner_pane)
-    let full_command = join([targeted_cmd, direction, lines_delta])
-    call s:SendTmuxCommand(full_command)
-    let s:vtr_percentage = new_percent
-    if g:VtrClearOnResize
-        call s:SendClearSequence()
-    endif
-endfunction
-
 function! s:SendCommandToRunner(...)
     if exists("a:1") && a:1 != ""
         let s:user_command = shellescape(a:1)
@@ -411,7 +380,6 @@ endfunction
 
 function! s:DefineCommands()
     command! -nargs=? VtrSendCommandToRunner call s:SendCommandToRunner(<f-args>)
-    command! -nargs=? VtrResizeRunner call s:ResizeRunnerPane(<args>)
     command! -nargs=? VtrOpenRunner call s:EnsureRunnerPane(<args>)
     command! -range VtrSendLinesToRunner <line1>,<line2>call s:SendLinesToRunner()
     command! VtrKillRunner call s:KillRunnerPane()
@@ -429,7 +397,6 @@ endfunction
 function! s:DefineKeymaps()
     if g:VtrUseVtrMaps
         nnoremap <leader>va :VtrAttachToPane<cr>
-        nnoremap <leader>rr :VtrResizeRunner<cr>
         nnoremap <leader>ror :VtrReorientRunner<cr>
         nnoremap <leader>sc :VtrSendCommandToRunner<cr>
         nnoremap <leader>sl :VtrSendLinesToRunner<cr>
@@ -452,7 +419,6 @@ function! s:InitializeVariables()
     call s:InitVariable("g:VtrClearBeforeSend", 1)
     call s:InitVariable("g:VtrPrompt", "Command to run: ")
     call s:InitVariable("g:VtrUseVtrMaps", 0)
-    call s:InitVariable("g:VtrClearOnResize", 0)
     call s:InitVariable("g:VtrClearOnReorient", 1)
     call s:InitVariable("g:VtrClearOnReattach", 1)
     call s:InitVariable("g:VtrDetachedName", "VTR_Pane")
