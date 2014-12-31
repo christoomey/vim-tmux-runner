@@ -185,19 +185,12 @@ function! s:BreakRunnerPaneToTempWindow()
     call s:SendTmuxCommand(full_command)
     let s:detached_window = s:LastWindowNumber()
     unlet s:runner_pane
+    unlet s:vim_pane
 endfunction
 
 function! s:RunnerDimensionSpec()
     let dimensions = join(["-p", s:vtr_percentage, "-".s:vtr_orientation])
     return dimensions
-endfunction
-
-function! s:_ReattachPane()
-    let join_cmd = join(["join-pane", "-s", ":".s:detached_window.".0",
-        \ s:RunnerDimensionSpec()])
-    call s:SendTmuxCommand(join_cmd)
-    unlet s:detached_window
-    let s:runner_pane = s:ActivePaneIndex()
 endfunction
 
 function! s:TmuxInfo(message)
@@ -273,11 +266,20 @@ endfunction
 
 function! s:ReattachPane()
     if !s:DetachedPaneAvailable() | return | endif
+    let s:vim_pane = s:ActivePaneIndex()
     call s:_ReattachPane()
     call s:FocusVimPane()
     if g:VtrClearOnReattach
         call s:SendClearSequence()
     endif
+endfunction
+
+function! s:_ReattachPane()
+    let join_cmd = join(["join-pane", "-s", ":".s:detached_window.".0",
+        \ s:RunnerDimensionSpec()])
+    call s:SendTmuxCommand(join_cmd)
+    unlet s:detached_window
+    let s:runner_pane = s:ActivePaneIndex()
 endfunction
 
 function! s:ReorientRunner()
