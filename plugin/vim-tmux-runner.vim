@@ -121,14 +121,6 @@ function! s:FocusRunnerPane()
     call s:SendTmuxCommand("resize-pane -Z")
 endfunction
 
-function! s:ZoomRunnerPane()
-    if !s:RequireRunnerPane() | return | endif
-    let copy_mode_cmd = s:TargetedTmuxCommand("copy-mode", s:runner_pane)
-    let zoom_command = s:TargetedTmuxCommand("resize-pane -Z", s:runner_pane)
-    call s:SendTmuxCommand(copy_mode_cmd)
-    call s:SendTmuxCommand(zoom_command)
-endfunction
-
 function! s:Strip(string)
     return substitute(a:string, '^\s*\(.\{-}\)\s*\n\?$', '\1', '')
 endfunction
@@ -391,7 +383,6 @@ function! s:DefineCommands()
     command! VtrFlushCommand call s:FlushCommand()
     command! VtrSendCtrlD call s:SendCtrlD()
     command! VtrAttachToPane call s:PromptForRunnerToAttach()
-    command! VtrZoomRunnerPane call s:ZoomRunnerPane()
 endfunction
 
 function! s:DefineKeymaps()
@@ -407,7 +398,6 @@ function! s:DefineKeymaps()
         nnoremap <leader>dr :VtrDetachRunner<cr>
         nnoremap <leader>cr :VtrClearRunner<cr>
         nnoremap <leader>fc :VtrFlushCommand<cr>
-        nnoremap <leader>zr :VtrZoomRunnerPane<cr>
     endif
 endfunction
 
