@@ -35,9 +35,7 @@ function! s:CreateRunnerPane(...)
 endfunction
 
 function! s:DetachRunnerPane()
-    if !s:RequireRunnerPane()
-        return
-    endif
+    if !s:RequireRunnerPane() | return | endif
     call s:BreakRunnerPaneToTempWindow()
     let cmd = join(["rename-window -t", s:detached_window, g:VtrDetachedName])
     call s:SendTmuxCommand(cmd)
@@ -84,9 +82,7 @@ function! s:KillDetachedWindow()
 endfunction
 
 function! s:KillRunnerPane()
-    if !s:RequireLocalPaneOrDetached()
-        return
-    endif
+    if !s:RequireLocalPaneOrDetached() | return | endif
     if exists("s:runner_pane")
         call s:KillLocalRunner()
     else
@@ -120,17 +116,17 @@ function! s:RunnerPaneDimensions()
 endfunction
 
 function! s:FocusRunnerPane()
-    call s:EnsureRunnerPane()
+    if !s:RequireRunnerPane() | return | endif
     call s:FocusTmuxPane(s:runner_pane)
     call s:SendTmuxCommand("resize-pane -Z")
 endfunction
 
 function! s:ZoomRunnerPane()
-  call s:EnsureRunnerPane()
-  let copy_mode_cmd = s:TargetedTmuxCommand("copy-mode", s:runner_pane)
-  let zoom_command = s:TargetedTmuxCommand("resize-pane -Z", s:runner_pane)
-  call s:SendTmuxCommand(copy_mode_cmd)
-  call s:SendTmuxCommand(zoom_command)
+    if !s:RequireRunnerPane() | return | endif
+    let copy_mode_cmd = s:TargetedTmuxCommand("copy-mode", s:runner_pane)
+    let zoom_command = s:TargetedTmuxCommand("resize-pane -Z", s:runner_pane)
+    call s:SendTmuxCommand(copy_mode_cmd)
+    call s:SendTmuxCommand(zoom_command)
 endfunction
 
 function! s:Strip(string)
@@ -163,9 +159,7 @@ function! s:SendEnterSequence()
 endfunction
 
 function! s:SendClearSequence()
-    if !s:RequireRunnerPane()
-        return
-    endif
+    if !s:RequireRunnerPane() | return | endif
     call s:_SendKeys(g:VtrClearSequence)
 endfunction
 
@@ -282,9 +276,7 @@ function! s:ValidRunnerPaneNumber(desired_pane)
 endfunction
 
 function! s:ReattachPane()
-    if !s:RequireDetachedPane()
-        return
-    endif
+    if !s:RequireDetachedPane() | return | endif
     call s:_ReattachPane()
     call s:FocusVimPane()
     if g:VtrClearOnReattach
@@ -293,9 +285,7 @@ function! s:ReattachPane()
 endfunction
 
 function! s:ReorientRunner()
-    if !s:RequireRunnerPane()
-        return
-    endif
+    if !s:RequireRunnerPane() | return | endif
     let temp_window = s:BreakRunnerPaneToTempWindow()
     call s:ToggleOrientationVariable()
     call s:_ReattachPane()
@@ -317,6 +307,7 @@ function! s:FlushCommand()
 endfunction
 
 function! s:SendCommandToRunner(...)
+    if !s:RequireRunnerPane() | return | endif
     if exists("a:1") && a:1 != ""
         let s:user_command = shellescape(a:1)
     endif
@@ -329,7 +320,6 @@ function! s:SendCommandToRunner(...)
         call s:EchoError("VTR: command string required")
         return
     endif
-    call s:EnsureRunnerPane()
     if g:VtrClearBeforeSend
         call s:SendClearSequence()
     endif
@@ -369,7 +359,7 @@ function! s:PrepareLines(lines)
 endfunction
 
 function! s:SendTextToRunner(lines)
-    call s:EnsureRunnerPane()
+    if !s:RequireRunnerPane() | return | endif
     let prepared = s:PrepareLines(a:lines)
     let joined_lines = join(prepared, "\r") . "\r"
     let send_keys_cmd = s:TargetedTmuxCommand("send-keys", s:runner_pane)
@@ -378,6 +368,7 @@ function! s:SendTextToRunner(lines)
 endfunction
 
 function! s:SendCtrlD()
+  if !s:RequireRunnerPane() | return | endif
   call s:SendKeys('')
 endfunction
 
