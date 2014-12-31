@@ -253,9 +253,18 @@ function! s:PromptForRunnerToAttach()
   endif
 endfunction
 
+function! s:CurrentMajorOrientation()
+  let orientation_map = { '[': 'v', '{': 'h' }
+  let layout = s:TmuxInfo('window_layout')
+  let outermost_orientation = substitute(layout, '[^[{]', '', 'g')[0]
+  return orientation_map[outermost_orientation]
+endfunction
+
 function! s:AttachToPane(desired_pane)
   if s:ValidRunnerPaneNumber(a:desired_pane)
     let s:runner_pane = a:desired_pane
+    let s:vim_pane = s:ActivePaneIndex()
+    let s:vtr_orientation = s:CurrentMajorOrientation()
     echohl String | echo "\rRunner pane set to: " . a:desired_pane | echohl None
   else
     call s:EchoError("Invalid pane number: " . a:desired_pane)
