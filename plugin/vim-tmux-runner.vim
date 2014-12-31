@@ -35,23 +35,27 @@ function! s:CreateRunnerPane(...)
 endfunction
 
 function! s:DetachRunnerPane()
-    if !s:RequireRunnerPane() | return | endif
+    if !s:ValidRunnerPaneSet() | return | endif
     call s:BreakRunnerPaneToTempWindow()
     let cmd = join(["rename-window -t", s:detached_window, g:VtrDetachedName])
     call s:SendTmuxCommand(cmd)
 endfunction
 
-function! s:RequireRunnerPane()
+function! s:ValidRunnerPaneSet()
     if !exists("s:runner_pane")
-        call s:EchoError("VTR: No runner pane attached.")
+        call s:EchoError("No runner pane attached.")
+        return 0
+    endif
+    if !s:ValidRunnerPaneNumber(s:runner_pane)
+        call s:EchoError("Runner pane setting (" . s:runner_pane . ") is invalid. Please reattach.")
         return 0
     endif
     return 1
 endfunction
 
-function! s:RequireDetachedPane()
+function! s:DetachedPaneAvailable()
     if !exists("s:detached_window")
-        call s:EchoError("VTR: No detached runner pane.")
+        call s:EchoError("No detached runner pane.")
         return 0
     endif
     return 1
@@ -59,7 +63,7 @@ endfunction
 
 function! s:RequireLocalPaneOrDetached()
     if !exists('s:detached_window') && !exists('s:runner_pane')
-        call s:EchoError("VTR: No pane, local or detached.")
+        call s:EchoError("No pane, local or detached.")
         return 0
     endif
     return 1
@@ -116,7 +120,7 @@ function! s:RunnerPaneDimensions()
 endfunction
 
 function! s:FocusRunnerPane()
-    if !s:RequireRunnerPane() | return | endif
+    if !s:ValidRunnerPaneSet() | return | endif
     call s:FocusTmuxPane(s:runner_pane)
     call s:SendTmuxCommand("resize-pane -Z")
 endfunction
@@ -151,7 +155,7 @@ function! s:SendEnterSequence()
 endfunction
 
 function! s:SendClearSequence()
-    if !s:RequireRunnerPane() | return | endif
+    if !s:ValidRunnerPaneSet() | return | endif
     call s:_SendKeys(g:VtrClearSequence)
 endfunction
 
@@ -219,7 +223,7 @@ function! s:AltPane()
   if s:PaneCount() == 2
     return s:AvailableRunnerPaneIndices()[0]
   else
-    echoerr "VTR: AltPane only valid if two panes open"
+    echoerr "AltPane only valid if two panes open"
   endif
 endfunction
 
@@ -258,7 +262,7 @@ function! s:AttachToPane(desired_pane)
 endfunction
 
 function! s:EchoError(message)
-  echohl ErrorMsg | echo "\r". a:message | echohl None
+  echohl ErrorMsg | echo "\rVTR: ". a:message | echohl None
 endfunction
 
 function! s:ValidRunnerPaneNumber(desired_pane)
@@ -268,7 +272,7 @@ function! s:ValidRunnerPaneNumber(desired_pane)
 endfunction
 
 function! s:ReattachPane()
-    if !s:RequireDetachedPane() | return | endif
+    if !s:DetachedPaneAvailable() | return | endif
     call s:_ReattachPane()
     call s:FocusVimPane()
     if g:VtrClearOnReattach
@@ -277,7 +281,7 @@ function! s:ReattachPane()
 endfunction
 
 function! s:ReorientRunner()
-    if !s:RequireRunnerPane() | return | endif
+    if !s:ValidRunnerPaneSet() | return | endif
     let temp_window = s:BreakRunnerPaneToTempWindow()
     call s:ToggleOrientationVariable()
     call s:_ReattachPane()
@@ -299,7 +303,7 @@ function! s:FlushCommand()
 endfunction
 
 function! s:SendCommandToRunner(...)
-    if !s:RequireRunnerPane() | return | endif
+    if !s:ValidRunnerPaneSet() | return | endif
     if exists("a:1") && a:1 != ""
         let s:user_command = shellescape(a:1)
     endif
@@ -309,7 +313,7 @@ function! s:SendCommandToRunner(...)
     let escaped_empty_string = "''"
     if s:user_command == escaped_empty_string
         unlet s:user_command
-        call s:EchoError("VTR: command string required")
+        call s:EchoError("command string required")
         return
     endif
     if g:VtrClearBeforeSend
@@ -351,7 +355,7 @@ function! s:PrepareLines(lines)
 endfunction
 
 function! s:SendTextToRunner(lines)
-    if !s:RequireRunnerPane() | return | endif
+    if !s:ValidRunnerPaneSet() | return | endif
     let prepared = s:PrepareLines(a:lines)
     let joined_lines = join(prepared, "\r") . "\r"
     let send_keys_cmd = s:TargetedTmuxCommand("send-keys", s:runner_pane)
@@ -360,7 +364,7 @@ function! s:SendTextToRunner(lines)
 endfunction
 
 function! s:SendCtrlD()
-  if !s:RequireRunnerPane() | return | endif
+  if !s:ValidRunnerPaneSet() | return | endif
   call s:SendKeys('')
 endfunction
 
