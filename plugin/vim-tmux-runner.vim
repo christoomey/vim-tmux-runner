@@ -371,9 +371,7 @@ function! s:SendCtrlD()
 endfunction
 
 function! VtrSendCommand(command)
-    call s:EnsureRunnerPane()
-    let escaped_command = shellescape(a:command)
-    call s:SendKeys(escaped_command)
+    call s:SendCommandToRunner(a:command)
 endfunction
 
 function! s:DefineCommands()
