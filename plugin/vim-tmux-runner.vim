@@ -304,7 +304,8 @@ function! s:FlushCommand()
     endif
 endfunction
 
-function! s:SendCommandToRunner(...)
+function! s:SendCommandToRunner(ensure_pane, ...)
+    if a:ensure_pane | call s:EnsureRunnerPane() | endif
     if !s:ValidRunnerPaneSet() | return | endif
     if exists("a:1") && a:1 != ""
         let s:user_command = shellescape(a:1)
@@ -338,7 +339,9 @@ function! s:EnsureRunnerPane(...)
     endif
 endfunction
 
-function! s:SendLinesToRunner() range
+function! s:SendLinesToRunner(ensure_pane) range
+    if a:ensure_pane | call s:EnsureRunnerPane() | endif
+    if !s:ValidRunnerPaneSet() | return | endif
     call s:SendTextToRunner(getline(a:firstline, a:lastline))
 endfunction
 
@@ -370,14 +373,18 @@ function! s:SendCtrlD()
   call s:SendKeys('')
 endfunction
 
-function! VtrSendCommand(command)
-    call s:SendCommandToRunner(a:command)
+function! VtrSendCommand(command, ...)
+    let ensure_pane = 0
+    if exists("a:1")
+      let ensure_pane = a:1
+    endif
+    call s:SendCommandToRunner(ensure_pane, a:command)
 endfunction
 
 function! s:DefineCommands()
-    command! -nargs=? VtrSendCommandToRunner call s:SendCommandToRunner(<f-args>)
     command! -nargs=? VtrOpenRunner call s:EnsureRunnerPane(<args>)
-    command! -range VtrSendLinesToRunner <line1>,<line2>call s:SendLinesToRunner()
+    command! -bang -nargs=? VtrSendCommandToRunner call s:SendCommandToRunner(<bang>0, <f-args>)
+    command! -bang -range VtrSendLinesToRunner <line1>,<line2>call s:SendLinesToRunner(<bang>0)
     command! VtrKillRunner call s:KillRunnerPane()
     command! VtrFocusRunner call s:FocusRunnerPane()
     command! VtrReorientRunner call s:ReorientRunner()
