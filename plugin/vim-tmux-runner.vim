@@ -184,8 +184,8 @@ function! s:BreakRunnerPaneToTempWindow()
     let full_command = join([targeted_cmd, "-d"])
     call s:SendTmuxCommand(full_command)
     let s:detached_window = s:LastWindowNumber()
+    let s:vim_pane = s:ActivePaneIndex()
     unlet s:runner_pane
-    unlet s:vim_pane
 endfunction
 
 function! s:RunnerDimensionSpec()
@@ -289,7 +289,7 @@ endfunction
 
 function! s:ReorientRunner()
     if !s:ValidRunnerPaneSet() | return | endif
-    let temp_window = s:BreakRunnerPaneToTempWindow()
+    call s:BreakRunnerPaneToTempWindow()
     call s:ToggleOrientationVariable()
     call s:_ReattachPane()
     call s:FocusVimPane()
