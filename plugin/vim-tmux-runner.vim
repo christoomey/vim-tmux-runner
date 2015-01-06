@@ -95,7 +95,7 @@ function! s:KillRunnerPane()
 endfunction
 
 function! s:ActivePaneIndex()
-  return s:SendTmuxCommand("display-message -p \"#{pane_index}\"")
+  return str2nr(s:SendTmuxCommand("display-message -p \"#{pane_index}\""))
 endfunction
 
 function! s:TmuxPanes()
@@ -229,7 +229,7 @@ function! s:PromptForRunnerToAttach()
     endif
     echohl String | let desired_pane = input('Pane #: ') | echohl None
     if desired_pane != ''
-      call s:AttachToPane(str2nr(desired_pane))
+      call s:AttachToPane(desired_pane)
     else
       call s:EchoError("No pane specified. Cancelling.")
     endif
@@ -244,13 +244,14 @@ function! s:CurrentMajorOrientation()
 endfunction
 
 function! s:AttachToPane(desired_pane)
-  if s:ValidRunnerPaneNumber(a:desired_pane)
-    let s:runner_pane = a:desired_pane
+  let desired_pane = str2nr(a:desired_pane)
+  if s:ValidRunnerPaneNumber(desired_pane)
+    let s:runner_pane = desired_pane
     let s:vim_pane = s:ActivePaneIndex()
     let s:vtr_orientation = s:CurrentMajorOrientation()
-    echohl String | echo "\rRunner pane set to: " . a:desired_pane | echohl None
+    echohl String | echo "\rRunner pane set to: " . desired_pane | echohl None
   else
-    call s:EchoError("Invalid pane number: " . a:desired_pane)
+    call s:EchoError("Invalid pane number: " . desired_pane)
   endif
 endfunction
 
@@ -258,9 +259,13 @@ function! s:EchoError(message)
   echohl ErrorMsg | echo "\rVTR: ". a:message | echohl None
 endfunction
 
+function! s:DesiredPaneExists(desired_pane)
+  return count(s:PaneIndices(), a:desired_pane) == 0
+endfunction
+
 function! s:ValidRunnerPaneNumber(desired_pane)
   if a:desired_pane == s:ActivePaneIndex() | return 0 | endif
-  if a:desired_pane > (s:PaneCount() - 1) | return 0 | endif
+  if s:DesiredPaneExists(a:desired_pane) | return 0 | endif
   return 1
 endfunction
 
