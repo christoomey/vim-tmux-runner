@@ -21,6 +21,7 @@ CONTENTS                                                        *vtr-contents*
         2.11 ............................... |VtrClearRunner|
         2.12 ............................... |VtrFlushCommand|
         2.13 ............................... |VtrSendCtrlD|
+        2.14 ............................... |VtrSendFile|
       3. Configuration ................... |VTR-Configuration|
         3.1 ................................ |VtrPercentage|
         3.2 ................................ |VtrOrientation|
@@ -216,6 +217,29 @@ run of |VtrSendCommandToRunner| will again prompt for the command to run.
 Send Ctrl-D key sequence to the runner without resetting the current command.
 This is useful if you are repeatedly running a script in the debugger and
 regularly need to kill the repl.
+
+------------------------------------------------------------------------------
+                                                                  *VtrSendFile*
+:VtrSendFile[!]
+
+Send a command to execute the current file as a script. The command will be
+crafted based on the filetype of the current buffer, e.g. for a file "foo.rb"
+(filetype "ruby"), the command would be "ruby {filename}" with {filename}
+populated based on the current file. There are default configurations provided
+for ruby, javascript (via node), python, and sh. You can override and or add
+by defining a dictionary in your Vimrc, e.g.:
+
+  let g:vtr_filteype_runner_overrides = {
+        \ 'ruby': 'ruby -w {file}',
+        \ 'haskell': 'runhaskell {file}'
+        \ }
+
+The key for each entry should be the fileype, and the value is a string for
+which the {file} portion will be replaced by the current file name when run.
+Any settings in your g:vtr_filteype_runner_overrides will take precedence
+over the default values.
+
+This command expects a runner to be attached. Add ! to force a runner.
 
 ==============================================================================
 CONFIGURATION (3)                                           *VTR-Configuration*

@@ -376,6 +376,33 @@ function! s:SendCtrlD()
   call s:SendKeys('')
 endfunction
 
+function! s:SendFileViaVtr(ensure_pane)
+    let runners = s:CurrentFiletypeRunners()
+    if has_key(runners, &filetype)
+        write
+        let runner = runners[&filetype]
+        let local_file_path = expand('%')
+        let run_command = substitute(runner, '{file}', local_file_path, 'g')
+        call VtrSendCommand(run_command, a:ensure_pane)
+    else
+        echoerr 'Unable to determine runner'
+    endif
+endfunction
+
+function! s:CurrentFiletypeRunners()
+    let default_runners = {
+            \ 'ruby': 'ruby {file}',
+            \ 'javascript': 'node {file}',
+            \ 'python': 'python {file}',
+            \ 'sh': 'sh {file}'
+            \ }
+    if exists("g:vtr_filteype_runner_overrides")
+      return extend(copy(default_runners), g:vtr_filteype_runner_overrides)
+    else
+      return default_runners
+    endif
+endfunction
+
 function! VtrSendCommand(command, ...)
     let ensure_pane = 0
     if exists("a:1")
@@ -385,9 +412,10 @@ function! VtrSendCommand(command, ...)
 endfunction
 
 function! s:DefineCommands()
-    command! -nargs=? VtrOpenRunner call s:EnsureRunnerPane(<args>)
     command! -bang -nargs=? VtrSendCommandToRunner call s:SendCommandToRunner(<bang>0, <f-args>)
     command! -bang -range VtrSendLinesToRunner <line1>,<line2>call s:SendLinesToRunner(<bang>0)
+    command! -bang VtrSendFile call s:SendFileViaVtr(<bang>0)
+    command! -nargs=? VtrOpenRunner call s:EnsureRunnerPane(<args>)
     command! VtrKillRunner call s:KillRunnerPane()
     command! VtrFocusRunner call s:FocusRunnerPane()
     command! VtrReorientRunner call s:ReorientRunner()
@@ -412,6 +440,7 @@ function! s:DefineKeymaps()
         nnoremap <leader>dr :VtrDetachRunner<cr>
         nnoremap <leader>cr :VtrClearRunner<cr>
         nnoremap <leader>fc :VtrFlushCommand<cr>
+        nnoremap <leader>sf :VtrSendFile<cr>
     endif
 endfunction
 
@@ -434,7 +463,6 @@ function! s:InitializeVariables()
     let s:vtr_percentage = g:VtrPercentage
     let s:vtr_orientation = g:VtrOrientation
 endfunction
-
 
 call s:InitializeVariables()
 call s:DefineCommands()
