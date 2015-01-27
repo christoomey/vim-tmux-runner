@@ -70,9 +70,7 @@ function! s:RequireLocalPaneOrDetached()
 endfunction
 
 function! s:KillLocalRunner()
-    if s:runner_pane == s:ActivePaneIndex()
-      call s:EchoError("RunnerPane is set to current pane. Cancelling")
-    else
+    if s:ValidRunnerPaneSet()
       let targeted_cmd = s:TargetedTmuxCommand("kill-pane", s:runner_pane)
       call s:SendTmuxCommand(targeted_cmd)
       unlet s:runner_pane
