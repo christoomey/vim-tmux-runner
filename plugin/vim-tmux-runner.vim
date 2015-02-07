@@ -53,12 +53,29 @@ function! s:ValidRunnerPaneSet()
     return 1
 endfunction
 
-function! s:DetachedPaneAvailable()
-    if !exists("s:detached_window")
-        call s:EchoError("No detached runner pane.")
-        return 0
-    endif
+function! s:DetachedWindowOutOfSync()
+  let window_map = s:WindowMap()
+  if index(keys(window_map), s:detached_window) == -1
     return 1
+  endif
+  if s:WindowMap()[s:detached_window] != g:VtrDetachedName
+    return 1
+  endif
+  return 0
+endfunction
+
+function! s:DetachedPaneAvailable()
+  if exists("s:detached_window")
+    if s:DetachedWindowOutOfSync()
+      call s:EchoError("Detached pane out of sync. Unable to kill")
+      unlet s:detached_window
+      return 0
+    endif
+  else
+    call s:EchoError("No detached runner pane.")
+    return 0
+  endif
+  return 1
 endfunction
 
 function! s:RequireLocalPaneOrDetached()
@@ -77,7 +94,18 @@ function! s:KillLocalRunner()
     endif
 endfunction
 
+function! s:WindowMap()
+  let window_pattern = '\v(\d+): ([-_a-zA-Z]{-})[-\* ]\s.*'
+  let window_map = {}
+  for line in split(s:SendTmuxCommand("list-windows"), "\n")
+    let dem = split(substitute(line, window_pattern, '\1:\2', ""), ':')
+    let window_map[dem[0]] = dem[1]
+  endfor
+  return window_map
+endfunction
+
 function! s:KillDetachedWindow()
+    if !s:DetachedPaneAvailable() | return | endif
     let cmd = join(["kill-window", '-t', s:detached_window])
     call s:SendTmuxCommand(cmd)
     unlet s:detached_window
