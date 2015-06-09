@@ -424,8 +424,8 @@ function! s:CurrentFiletypeRunners()
             \ 'python': 'python {file}',
             \ 'sh': 'sh {file}'
             \ }
-    if exists("g:vtr_filteype_runner_overrides")
-      return extend(copy(default_runners), g:vtr_filteype_runner_overrides)
+    if exists("g:vtr_filetype_runner_overrides")
+      return extend(copy(default_runners), g:vtr_filetype_runner_overrides)
     else
       return default_runners
     endif
