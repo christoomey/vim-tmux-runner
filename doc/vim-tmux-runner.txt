@@ -9,7 +9,7 @@ CONTENTS                                                        *vtr-contents*
       1. About............................ |VTR-About|
       2. Usage ........................... |VTR-Usage|
         2.1  ............................... |VtrSendCommandToRunner|
-        2.2  ............................... |VtrSendLineToRunner|
+        2.2  ............................... |VtrSendLinesToRunner|
         2.3  ............................... |VtrSendSelectedToRunner|
         2.4  ............................... |VtrOpenRunner|
         2.5  ............................... |VtrKillRunner|
@@ -70,7 +70,7 @@ USAGE (2)                                                           *VTR-Usage*
 VTR provides a collection of commands and functions that allow Vim to interact
 with tmux. The primary command is VtrSendCommandToRunner. This allows for any
 command string to be passed to tmux for execution. The commands
-VtrSendLineToRunner and VtrSendSelectedToRunner allow for either the current
+VtrSendLinesToRunner and VtrSendSelectedToRunner allow for either the current
 visually selected region or the current line to be sent to the tmux runner
 pane for execution.  This functionality is similar to SLIME[5] mode for the
 Emacs text editor.
@@ -102,8 +102,8 @@ continue to be used for subsequent calls to the command. The stored command
 can be cleared using |VtrFlushCommand|.
 
 ------------------------------------------------------------------------------
-                                                          *VtrSendLineToRunner*
-2.2 VtrSendLineToRunner~
+                                                          *VtrSendLinesToRunner*
+2.2 VtrSendLinesToRunner~
 
 Send the current line from the Vim buffer to the runner pane for execution.
 
@@ -339,7 +339,7 @@ The following normal mode maps are provided when g:VtrUseVtrMaps is set to 1:
         <leader>rr   |   VtrResizeRunner<cr>
         <leader>ror  |   VtrReorientRunner<cr>
         <leader>sc   |   VtrSendCommandToRunner<cr>
-        <leader>sl   |   VtrSendLineToRunner<cr>
+        <leader>sl   |   VtrSendLinesToRunner<cr>
         <leader>or   |   VtrOpenRunner<cr>
         <leader>kr   |   VtrKillRunner<cr>
         <leader>fr   |   VtrFocusRunner<cr>
