@@ -26,6 +26,8 @@ possible.
 For a complete summary of the available commands and configuration options in
 VTR, check [the included doc file][].
 
+You can watch a [short demo][] by [Jack Franklin][] recorded at [Vim London][].
+
 Installation
 ------------
 
@@ -75,3 +77,6 @@ been added to provide additional control over the tmux runner pane.
 [Vundle]: https://github.com/gmarik/vundle
 [tmux]: http://tmux.sourceforge.net/
 [Vimux]: https://github.com/benmills/vimux
+[short demo]: https://vimeo.com/126420226
+[Jack Franklin]: https://github.com/jackfranklin
+[Vim London]: http://www.meetup.com/Vim-London/
