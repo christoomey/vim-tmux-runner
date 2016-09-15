@@ -10,18 +10,17 @@ CONTENTS                                                        *vtr-contents*
       2. Usage ........................... |VTR-Usage|
         2.1  ............................... |VtrSendCommandToRunner|
         2.2  ............................... |VtrSendLinesToRunner|
-        2.3  ............................... |VtrSendSelectedToRunner|
-        2.4  ............................... |VtrOpenRunner|
-        2.5  ............................... |VtrKillRunner|
-        2.6  ............................... |VtrFocusRunner|
-        2.7  ............................... |VtrResizeRunner|
-        2.8  ............................... |VtrReorientRunner|
-        2.9  ............................... |VtrDetachRunner|
-        2.10 ............................... |VtrReattachRunner|
-        2.11 ............................... |VtrClearRunner|
-        2.12 ............................... |VtrFlushCommand|
-        2.13 ............................... |VtrSendCtrlD|
-        2.14 ............................... |VtrSendFile|
+        2.3  ............................... |VtrOpenRunner|
+        2.4  ............................... |VtrKillRunner|
+        2.5  ............................... |VtrFocusRunner|
+        2.6  ............................... |VtrResizeRunner|
+        2.7  ............................... |VtrReorientRunner|
+        2.8  ............................... |VtrDetachRunner|
+        2.9  ............................... |VtrReattachRunner|
+        2.10 ............................... |VtrClearRunner|
+        2.11 ............................... |VtrFlushCommand|
+        2.12 ............................... |VtrSendCtrlD|
+        2.13 ............................... |VtrSendFile|
       3. Configuration ................... |VTR-Configuration|
         3.1 ................................ |VtrPercentage|
         3.2 ................................ |VtrOrientation|
@@ -69,8 +68,8 @@ USAGE (2)                                                           *VTR-Usage*
 
 VTR provides a collection of commands and functions that allow Vim to interact
 with tmux. The primary command is VtrSendCommandToRunner. This allows for any
-command string to be passed to tmux for execution. The commands
-VtrSendLinesToRunner and VtrSendSelectedToRunner allow for either the current
+command string to be passed to tmux for execution. The command
+VtrSendLinesToRunner allow for either the current
 visually selected region or the current line to be sent to the tmux runner
 pane for execution.  This functionality is similar to SLIME[5] mode for the
 Emacs text editor.
@@ -105,18 +104,12 @@ can be cleared using |VtrFlushCommand|.
                                                           *VtrSendLinesToRunner*
 2.2 VtrSendLinesToRunner~
 
-Send the current line from the Vim buffer to the runner pane for execution.
-
-------------------------------------------------------------------------------
-                                                      *VtrSendSelectedToRunner*
-2.3 VtrSendSelectedToRunner~
-
-Send the current visual selection in the Vim buffer to the runner pane for
-execution.
+Send the current line or the current visual selection from the Vim buffer 
+to the runner pane for execution.
 
 ------------------------------------------------------------------------------
                                                                 *VtrOpenRunner*
-2.4 VtrOpenRunner~
+2.3 VtrOpenRunner~
 
 Open a tmux pane, referred to as the "runner", adjacent to the tmux pane
 containing the current Vim session. This command will make use of the
@@ -138,7 +131,7 @@ Ruby Repl:
 
 ------------------------------------------------------------------------------
                                                                 *VtrKillRunner*
-2.5 VtrKillRunner~
+2.4 VtrKillRunner~
 
 Kill the tmux runner pane. this pane will kill either the local or detached
 runner pane. this command does nothing if there is currently not a runner
@@ -146,7 +139,7 @@ pane.
 
 ------------------------------------------------------------------------------
                                                                *VtrFocusRunner*
-2.6 VtrFocusRunner~
+2.5 VtrFocusRunner~
 
 Move the cursor to the runner to interact directly with it. A new runner will
 be created if one does not exist and a detached pane will be restored as
@@ -154,7 +147,7 @@ needed.
 
 ------------------------------------------------------------------------------
                                                               *VtrResizeRunner*
-2.7 VtrResizeRunner~
+2.6 VtrResizeRunner~
 
 Prompt for a new percentage then resize the runner pane to that percentage.
 This command will update the |VtrPercentage| setting for the current Vim
@@ -164,7 +157,7 @@ with the |VtrClearOnResize| setting.
 
 ------------------------------------------------------------------------------
                                                             *VtrReorientRunner*
-2.8 VtrReorientRunner~
+2.7 VtrReorientRunner~
 
 Switch the runner pane from its current orientation to the alternate
 orientation (horizontal or vertical). The |VtrPercentage| will be maintained
@@ -174,7 +167,7 @@ setting.
 
 ------------------------------------------------------------------------------
                                                               *VtrDetachRunner*
-2.9 VtrDetachRunner~
+2.8 VtrDetachRunner~
 
 Detach the runner pane to its own window while keeping the cursor focus on the
 Vim window. This command is useful if there are details in the runner pane or
@@ -187,7 +180,7 @@ needed again. The runner can later be restored with any of |VtrReattachRunner|,
 
 ------------------------------------------------------------------------------
                                                             *VtrReattachRunner*
-2.10 VtrReattachRunner~
+2.9 VtrReattachRunner~
 
 Reattach the runner pane. This command assumes that the runner has previously
 been dismissed using the |VtrDetachRunner| command. The pane will be restored
@@ -197,7 +190,7 @@ behavior can be disabled using the |VtrClearOnReattach| setting.
 
 ------------------------------------------------------------------------------
                                                                *VtrClearRunner*
-2.11 VtrClearRunner~
+2.10 VtrClearRunner~
 
 Send the key sequence defined by the |VtrClearSequence| setting to the runner.
 By default this will clear any unfinished commands at the shell prompt and
@@ -205,7 +198,7 @@ move the prompt up to hide any previous command output.
 
 ------------------------------------------------------------------------------
                                                               *VtrFlushCommand*
-2.12 VtrFlushCommand~
+2.11 VtrFlushCommand~
 
 Flush the previous run command variable. After running this command, the next
 run of |VtrSendCommandToRunner| will again prompt for the command to run.
@@ -220,7 +213,7 @@ regularly need to kill the repl.
 
 ------------------------------------------------------------------------------
                                                                   *VtrSendFile*
-:VtrSendFile[!]
+2.13 VtrSendFile~
 
 Send a command to execute the current file as a script. The command will be
 crafted based on the filetype of the current buffer, e.g. for a file "foo.rb"
@@ -353,7 +346,7 @@ region to the runner pane:
 
         Mapping      |   Command
         -----------------------------
-        <leader>sv   |   VtrSendSelectedToRunner<cr>
+        <leader>sl   |   VtrSendLinesToRunner<cr>
 
 Default: 0
 
