@@ -171,7 +171,9 @@ function! s:_SendKeys(keys)
 endfunction
 
 function! s:SendKeys(keys)
-    let cmd = g:VtrClearBeforeSend ? g:VtrClearSequence.a:keys : a:keys
+    let clear_cmd = g:VtrClearBeforeSend ? g:VtrClearSequence : ""
+    let before_cmd = shellescape(g:VtrBeforeEach)
+    let cmd = join([clear_cmd, before_cmd, a:keys])
     call s:_SendKeys(cmd)
     call s:SendEnterSequence()
 endfunction
@@ -477,6 +479,7 @@ function! s:InitializeVariables()
     call s:InitVariable("g:VtrOrientation", "v")
     call s:InitVariable("g:VtrInitialCommand", "")
     call s:InitVariable("g:VtrGitCdUpOnOpen", 0)
+    call s:InitVariable("g:VtrBeforeEach", " ")
     call s:InitVariable("g:VtrClearBeforeSend", 1)
     call s:InitVariable("g:VtrPrompt", "Command to run: ")
     call s:InitVariable("g:VtrUseVtrMaps", 0)

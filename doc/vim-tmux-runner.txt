@@ -21,6 +21,7 @@ CONTENTS                                                        *vtr-contents*
         2.11 ............................... |VtrFlushCommand|
         2.12 ............................... |VtrSendCtrlD|
         2.13 ............................... |VtrSendFile|
+        2.14 ............................... |VtrBeforeEach|
       3. Configuration ................... |VTR-Configuration|
         3.1 ................................ |VtrPercentage|
         3.2 ................................ |VtrOrientation|
@@ -233,6 +234,22 @@ Any settings in your g:vtr_filetype_runner_overrides will take precedence
 over the default values.
 
 This command expects a runner to be attached. Add ! to force a runner.
+
+------------------------------------------------------------------------------
+                                                                *VtrBeforeEach*
+2.14 VtrBeforeEach~
+
+Append something to the beggining of every command sent to the runner.
+A possible use case for this is to prevent your ran commands to be included in
+your history file. For that, set this variable to a single space:
+
+  let g:BeforeEach = " "
+
+And configure your shell's history to ignore commands that begin with a space.
+For instance, in zsh, you can do that with:
+
+  setopt HIST_IGNORE_SPACE
+
 
 ==============================================================================
 CONFIGURATION (3)                                           *VTR-Configuration*
