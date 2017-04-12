@@ -419,9 +419,10 @@ endfunction
 
 function! s:CurrentFiletypeRunners()
     let default_runners = {
-            \ 'ruby': 'ruby {file}',
+            \ 'elixir': 'elixir {file}',
             \ 'javascript': 'node {file}',
             \ 'python': 'python {file}',
+            \ 'ruby': 'ruby {file}',
             \ 'sh': 'sh {file}'
             \ }
     if exists("g:vtr_filetype_runner_overrides")

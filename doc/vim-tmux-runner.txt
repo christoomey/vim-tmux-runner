@@ -104,7 +104,7 @@ can be cleared using |VtrFlushCommand|.
                                                           *VtrSendLinesToRunner*
 2.2 VtrSendLinesToRunner~
 
-Send the current line or the current visual selection from the Vim buffer 
+Send the current line or the current visual selection from the Vim buffer
 to the runner pane for execution.
 
 ------------------------------------------------------------------------------
@@ -219,8 +219,8 @@ Send a command to execute the current file as a script. The command will be
 crafted based on the filetype of the current buffer, e.g. for a file "foo.rb"
 (filetype "ruby"), the command would be "ruby {filename}" with {filename}
 populated based on the current file. There are default configurations provided
-for ruby, javascript (via node), python, and sh. You can override and or add
-by defining a dictionary in your Vimrc, e.g.:
+for elixir, javascript (via node), python, ruby, and sh. You can override and
+or add by defining a dictionary in your Vimrc, e.g.:
 
   let g:vtr_filetype_runner_overrides = {
         \ 'ruby': 'ruby -w {file}',
