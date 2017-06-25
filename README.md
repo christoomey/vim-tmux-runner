@@ -31,16 +31,14 @@ You can watch a [short demo][] by [Jack Franklin][] recorded at [Vim London][].
 Installation
 ------------
 
-The easiest way to install VTR is to add the git repo as a bundle, then use
-[Pathogen][], [Vundle][] or similar plugin management option to add it to Vim's
-runtime path.
+If you don't have a preferred installation method, I recommend using
+[vim-plug][]:
 
-``` shell
-cd ~/.vim
-mkdir bundles  # only
-cd bundles
-git clone https://github.com/christoomey/vim-tmux-runner.git
+```vim
+Plug 'christoomey/vim-tmux-runner'
 ```
+
+[vim-plug]: https://github.com/junegunn/vim-plug
 
 Python Notes
 ------------
