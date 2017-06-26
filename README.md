@@ -38,6 +38,9 @@ If you don't have a preferred installation method, I recommend using
 Plug 'christoomey/vim-tmux-runner'
 ```
 
+*Note* - you'll need to have a relatively recent (2.0+) version of Tmux to use
+this plugin.
+
 [vim-plug]: https://github.com/junegunn/vim-plug
 
 Python Notes
