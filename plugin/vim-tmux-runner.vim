@@ -176,6 +176,19 @@ function! s:SendKeys(keys)
     call s:SendEnterSequence()
 endfunction
 
+function! s:SendKeysRaw(keys)
+  if !s:ValidRunnerPaneSet() | return | endif
+  call s:_SendKeys(a:keys)
+endfunction
+
+function! s:SendCtrlD()
+  call s:SendKeysRaw('')
+endfunction
+
+function! s:SendCtrlC()
+  call s:SendKeysRaw('')
+endfunction
+
 function! s:SendEnterSequence()
     call s:_SendKeys("Enter")
 endfunction
@@ -399,11 +412,6 @@ function! s:SendTextToRunner(lines)
     call s:SendTmuxCommand(targeted_cmd)
 endfunction
 
-function! s:SendCtrlD()
-  if !s:ValidRunnerPaneSet() | return | endif
-  call s:SendKeys('')
-endfunction
-
 function! s:SendFileViaVtr(ensure_pane)
     let runners = s:CurrentFiletypeRunners()
     if has_key(runners, &filetype)
@@ -453,7 +461,9 @@ function! s:DefineCommands()
     command! VtrClearRunner call s:SendClearSequence()
     command! VtrFlushCommand call s:FlushCommand()
     command! VtrSendCtrlD call s:SendCtrlD()
+    command! VtrSendCtrlC call s:SendCtrlC()
     command! VtrAttachToPane call s:PromptForRunnerToAttach()
+    command! -nargs=1 VtrSendKeysRaw call s:SendKeysRaw(<q-args>)
 endfunction
 
 function! s:DefineKeymaps()
