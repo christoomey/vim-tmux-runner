@@ -460,5 +460,22 @@ line to any multi line send, use the following setting.
 
 Default: 0
 
+------------------------------------------------------------------------------
+                                                             *VtrBracketedPaste*
+
+3.15 g:VtrBracketedPaste
+
+Wrap the text to be sent with the bracketed paste characters \e[200~ and \e[201~,
+so that the terminal doesn't execute anything until all lines have been
+received.
+
+This is especially useful for iPython versions 5+, where otherwise only the
+first line of a selection will be executed.
+
+  let g:VtrBracketedPaste = 1
+
+Default: 0
+
+
 ==============================================================================
 vim:tw=78:ts=2:sw=2:expandtab:ft=help:norl:
