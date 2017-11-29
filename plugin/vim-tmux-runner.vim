@@ -370,10 +370,26 @@ function! s:EnsureRunnerPane(...)
     endif
 endfunction
 
+function! s:get_visual_selection()
+    " Why is this not a built-in Vim script function?!
+    " Released into the public domain by xolox
+    " https://stackoverflow.com/a/6271254
+    let [line_start, column_start] = getpos("'<")[1:2]
+    let [line_end, column_end] = getpos("'>")[1:2]
+    let lines = getline(line_start, line_end)
+    if len(lines) == 0
+        return ''
+    endif
+    let lines[-1] = lines[-1][: column_end - (&selection == 'inclusive' ? 1 : 2)]
+    let lines[0] = lines[0][column_start - 1:]
+    return lines
+endfunction
+
 function! s:SendLinesToRunner(ensure_pane) range
     if a:ensure_pane | call s:EnsureRunnerPane() | endif
     if !s:ValidRunnerPaneSet() | return | endif
-    call s:SendTextToRunner(getline(a:firstline, a:lastline))
+    let lines = s:get_visual_selection()
+    call s:SendTextToRunner(lines)
 endfunction
 
 function! s:PrepareLines(lines)
