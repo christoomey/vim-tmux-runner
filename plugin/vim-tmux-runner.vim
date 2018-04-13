@@ -246,19 +246,25 @@ function! s:AltPane()
   endif
 endfunction
 
-function! s:PromptForRunnerToAttach()
-  if s:PaneCount() == 2
-    call s:AttachToPane(s:AltPane())
+function! s:AttachToPane(...)
+  if exists("a:1") && a:1 != ""
+    call s:AttachToSpecifiedPane(a:1)
+  elseif s:PaneCount() == 2
+    call s:AttachToSpecifiedPane(s:AltPane())
   else
-    if g:VtrDisplayPaneNumbers
-      call s:SendTmuxCommand('source ~/.tmux.conf && tmux display-panes')
-    endif
-    echohl String | let desired_pane = input('Pane #: ') | echohl None
-    if desired_pane != ''
-      call s:AttachToPane(desired_pane)
-    else
-      call s:EchoError("No pane specified. Cancelling.")
-    endif
+    call s:PromptForPaneToAttach()
+  endif
+endfunction
+
+function! s:PromptForPaneToAttach()
+  if g:VtrDisplayPaneNumbers
+    call s:SendTmuxCommand('source ~/.tmux.conf && tmux display-panes')
+  endif
+  echohl String | let desired_pane = input('Pane #: ') | echohl None
+  if desired_pane != ''
+    call s:AttachToSpecifiedPane(desired_pane)
+  else
+    call s:EchoError("No pane specified. Cancelling.")
   endif
 endfunction
 
@@ -269,7 +275,7 @@ function! s:CurrentMajorOrientation()
   return orientation_map[outermost_orientation]
 endfunction
 
-function! s:AttachToPane(desired_pane)
+function! s:AttachToSpecifiedPane(desired_pane)
   let desired_pane = str2nr(a:desired_pane)
   if s:ValidRunnerPaneNumber(desired_pane)
     let s:runner_pane = desired_pane
@@ -453,7 +459,7 @@ function! s:DefineCommands()
     command! VtrClearRunner call s:SendClearSequence()
     command! VtrFlushCommand call s:FlushCommand()
     command! VtrSendCtrlD call s:SendCtrlD()
-    command! VtrAttachToPane call s:PromptForRunnerToAttach()
+    command! -bang -nargs=? VtrAttachToPane call s:AttachToPane(<f-args>)
 endfunction
 
 function! s:DefineKeymaps()
