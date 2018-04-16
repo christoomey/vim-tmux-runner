@@ -246,7 +246,17 @@ function! s:AltPane()
   endif
 endfunction
 
-function! s:PromptForRunnerToAttach()
+function! s:PromptForRunnerToAttach(...)
+  let s:pane_index = ''
+  if exists("a:1") && a:1 != ""
+      let s:pane_index = a:1
+  endif
+
+  if s:pane_index != ''
+    call s:AttachToPane(s:pane_index)
+    return
+  endif
+
   if s:PaneCount() == 2
     call s:AttachToPane(s:AltPane())
   else
@@ -453,7 +463,7 @@ function! s:DefineCommands()
     command! VtrClearRunner call s:SendClearSequence()
     command! VtrFlushCommand call s:FlushCommand()
     command! VtrSendCtrlD call s:SendCtrlD()
-    command! VtrAttachToPane call s:PromptForRunnerToAttach()
+    command! -bang -nargs=? VtrAttachToPane call s:PromptForRunnerToAttach(<f-args>)
 endfunction
 
 function! s:DefineKeymaps()
