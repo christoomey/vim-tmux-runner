@@ -251,7 +251,12 @@ function! s:PromptForRunnerToAttach(...)
   if exists("a:1") && a:1 != ""
       let s:pane_index = a:1
   endif
-  if s:pane_index == ''
+
+  if s:pane_index != ''
+    call s:AttachToPane(s:pane_index)
+    return
+  endif
+
   if s:PaneCount() == 2
     call s:AttachToPane(s:AltPane())
   else
@@ -264,10 +269,6 @@ function! s:PromptForRunnerToAttach(...)
     else
       call s:EchoError("No pane specified. Cancelling.")
     endif
-  endif
-  else
-    echom s:pane_index
-    call s:AttachToPane(s:pane_index)
   endif
 endfunction
 
