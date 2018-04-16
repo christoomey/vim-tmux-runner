@@ -182,13 +182,20 @@ endfunction
 
 function! s:SendClearSequence()
     if !s:ValidRunnerPaneSet() | return | endif
+    call s:SendTmuxCopyModeExit()
     call s:_SendKeys(g:VtrClearSequence)
+endfunction
+
+function! s:SendQuitSequence()
+    if !s:ValidRunnerPaneSet() | return | endif
+    call s:_SendKeys("q")
 endfunction
 
 function! s:GitCdUp()
     let git_repo_check = "git rev-parse --git-dir > /dev/null 2>&1"
     let cdup_cmd = "cd './'$(git rev-parse --show-cdup)"
     let cmd = shellescape(join([git_repo_check, '&&', cdup_cmd]))
+    call s:SendTmuxCopyModeExit()
     call s:SendKeys(cmd)
     call s:SendClearSequence()
 endfunction
@@ -341,6 +348,15 @@ function! s:FlushCommand()
     endif
 endfunction
 
+function! s:SendTmuxCopyModeExit()
+    let l:session = s:TmuxInfo('session_name')
+    let l:win = s:TmuxInfo('window_index')
+    let target_cmd = join([l:session.':'.l:win.".".s:runner_pane])
+    if s:SendTmuxCommand("display-message -p -F '#{pane_in_mode}' -t " . l:target_cmd)
+        call s:SendQuitSequence()
+    endif
+endfunction
+
 function! s:SendCommandToRunner(ensure_pane, ...)
     if a:ensure_pane | call s:EnsureRunnerPane() | endif
     if !s:ValidRunnerPaneSet() | return | endif
@@ -356,6 +372,7 @@ function! s:SendCommandToRunner(ensure_pane, ...)
         call s:EchoError("command string required")
         return
     endif
+    call s:SendTmuxCopyModeExit()
     if g:VtrClearBeforeSend
         call s:SendClearSequence()
     endif
@@ -379,6 +396,7 @@ endfunction
 function! s:SendLinesToRunner(ensure_pane) range
     if a:ensure_pane | call s:EnsureRunnerPane() | endif
     if !s:ValidRunnerPaneSet() | return | endif
+    call s:SendTmuxCopyModeExit()
     call s:SendTextToRunner(getline(a:firstline, a:lastline))
 endfunction
 
@@ -407,6 +425,7 @@ endfunction
 
 function! s:SendCtrlD()
   if !s:ValidRunnerPaneSet() | return | endif
+  call s:SendTmuxCopyModeExit()
   call s:SendKeys('')
 endfunction
 
