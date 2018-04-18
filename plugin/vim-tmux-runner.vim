@@ -397,7 +397,18 @@ function! s:SendLinesToRunner(ensure_pane) range
     if a:ensure_pane | call s:EnsureRunnerPane() | endif
     if !s:ValidRunnerPaneSet() | return | endif
     call s:SendTmuxCopyModeExit()
-    call s:SendTextToRunner(getline(a:firstline, a:lastline))
+    call s:SendLinesOfTextToRunner(getline(a:firstline, a:lastline))
+endfunction
+
+function! s:SendLinesWithVimMotionToRunner(type, ...)
+    if !s:ValidRunnerPaneSet() | return | endif
+    call s:SendTmuxCopyModeExit()
+    if a:type == 'lines'
+        call s:SendLinesOfTextToRunner(getline(a:1, a:2))
+    elseif a:type == 'words'
+        call s:SendWordsOfTextToRunner(a:1)
+    else
+    endif
 endfunction
 
 function! s:PrepareLines(lines)
@@ -414,12 +425,18 @@ function! s:PrepareLines(lines)
     return prepared
 endfunction
 
-function! s:SendTextToRunner(lines)
+function! s:SendLinesOfTextToRunner(lines)
     if !s:ValidRunnerPaneSet() | return | endif
     let prepared = s:PrepareLines(a:lines)
     let joined_lines = join(prepared, "\r") . "\r"
     let send_keys_cmd = s:TargetedTmuxCommand("send-keys", s:runner_pane)
     let targeted_cmd = send_keys_cmd . ' ' . shellescape(joined_lines)
+    call s:SendTmuxCommand(targeted_cmd)
+endfunction
+
+function! s:SendWordsOfTextToRunner(words)
+    let send_keys_cmd = s:TargetedTmuxCommand("send-keys", s:runner_pane)
+    let targeted_cmd = send_keys_cmd . ' ' . shellescape(a:words) . ' Enter'
     call s:SendTmuxCommand(targeted_cmd)
 endfunction
 
@@ -465,6 +482,29 @@ function! VtrSendCommand(command, ...)
     call s:SendCommandToRunner(ensure_pane, a:command)
 endfunction
 
+function! s:VtrSendLinesWithMotion(type, ...)
+    let sel_save = &selection
+    let &selection = "inclusive"
+	let reg_save = @@
+
+    call s:EnsureRunnerPane()
+    if a:0 == 1
+        let s:firstline = line("'<")
+        let s:endline = line("'>")
+        call s:SendLinesWithVimMotionToRunner('lines', s:firstline, s:endline)
+    elseif a:type == 'line'
+        let s:firstline = line("'[")
+        let s:endline = line("']")
+        call s:SendLinesWithVimMotionToRunner('lines', s:firstline, s:endline)
+    else
+	    silent exe "normal! `[v`]y"
+        call s:SendLinesWithVimMotionToRunner('words', @@)
+    endif
+
+    let &selection = sel_save
+	let @@ = reg_save
+endfunction
+
 function! s:DefineCommands()
     command! -bang -nargs=? VtrSendCommandToRunner call s:SendCommandToRunner(<bang>0, <f-args>)
     command! -bang -range VtrSendLinesToRunner <line1>,<line2>call s:SendLinesToRunner(<bang>0)
@@ -495,6 +535,8 @@ function! s:DefineKeymaps()
         nnoremap <leader>cr :VtrClearRunner<cr>
         nnoremap <leader>fc :VtrFlushCommand<cr>
         nnoremap <leader>sf :VtrSendFile<cr>
+        nnoremap <leader>sm :set opfunc=<SID>VtrSendLinesWithMotion<CR>g@
+        vnoremap <leader>sm :<C-U>call <SID>VtrSendLinesWithMotion(visualmode(), 1)<CR>
     endif
 endfunction
 
