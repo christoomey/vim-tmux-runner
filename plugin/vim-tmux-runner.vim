@@ -478,7 +478,7 @@ function! s:DefineCommands()
     command! VtrClearRunner call s:SendClearSequence()
     command! VtrFlushCommand call s:FlushCommand()
     command! VtrSendCtrlD call s:SendCtrlD()
-    command! -bang -nargs=? VtrAttachToPane call s:AttachToPane(<f-args>)
+    command! -bang -nargs=? -bar VtrAttachToPane call s:AttachToPane(<f-args>)
 endfunction
 
 function! s:DefineKeymaps()
