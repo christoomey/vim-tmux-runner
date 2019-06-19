@@ -34,7 +34,7 @@ CONTENTS                                                        *vtr-contents*
         3.9 ................................ |VtrClearOnReattach|
         3.10 ............................... |VtrDetachedName|
         3.11 ............................... |VtrClearSequence|
-        3.12 ............................... |VtrStripLeadningWhitespace|
+        3.12 ............................... |VtrStripLeadingWhitespace|
         3.13 ............................... |VtrClearEmptyLines|
         3.14 ............................... |VtrAppendNewline|
 
@@ -419,7 +419,7 @@ insert mode. See the help file, ':help i_Ctrl-v', for more detail.
 Default: ""
 
 ------------------------------------------------------------------------------
-                                                   *VtrStripLeadningWhitespace*
+                                                   *VtrStripLeadingWhitespace*
 
 3.12 g:VtrStripLeadingWhitespace~
 
