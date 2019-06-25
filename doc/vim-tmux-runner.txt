@@ -89,10 +89,15 @@ environments and it is this ability that give VTR its power.
                                                        *VtrSendCommandToRunner*
 2.1 VtrSendCommandToRunner~
 
-Send a command to the tmux runner pane. This is the primary purpose of VTR. A
-new runner pane will be created. A detached pane will be reattached. By
-default, the runner will be cleared before sending the provided command, but
-this behavior can be disabled with the |VtrClearBeforeSend| setting.
+Send a command to the tmux runner pane. This is the primary purpose of VTR.
+
+Before using this command, attaching to a tmux runner pane via VtrOpenRunner
+or VtrAttachToPane is required. If you would like VTR to create a runner pane
+if it doesn't exist while issuing a command, a bang version can be used:
+VtrSendCommandToRunner!.
+
+By default, the runner will be cleared before sending the provided command,
+but this behavior can be disabled with the |VtrClearBeforeSend| setting.
 
 The first time this command is called, it will prompt for a command to send to
 the runner. The specific prompt text can be configured via the |VtPrompt|

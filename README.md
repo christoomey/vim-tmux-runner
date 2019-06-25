@@ -14,9 +14,11 @@ VtrSendCommandToRunner
 ```
 
 This command will prompt for a command to run, then send it to the runner pane
-for execution. If one doesn't currently exist, a new runner pane will be
-created. Subsequent calls to `VtrSendCommandToRunner` will reuse the provided
-command.
+for execution. Subsequent calls to `VtrSendCommandToRunner` will reuse the
+provided command.
+
+If you would like VTR to create a runner pane if one doesn't exist while issuing
+a command, a bang version can be used: `VtrSendCommandToRunner!`.
 
 VTR provides configuration options that allow for control over the size and
 location of the VTR runner pane. In addition, VTR provides commands to resize,
