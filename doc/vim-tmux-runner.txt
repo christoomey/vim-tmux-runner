@@ -1,4 +1,4 @@
-*vim-tmux-runner.txt*	      For Vim version 7.3	      Last change: 2012 Nov 25
+*vim-tmux-runner.txt*	      For Vim version 7.3	      Last change: 2019 Oct 05
 
                             Vim Tmux Runner
                     Vim and tmux, sittin' in a tree...
@@ -13,14 +13,15 @@ CONTENTS                                                        *vtr-contents*
         2.3  ............................... |VtrOpenRunner|
         2.4  ............................... |VtrKillRunner|
         2.5  ............................... |VtrFocusRunner|
-        2.6  ............................... |VtrResizeRunner|
-        2.7  ............................... |VtrReorientRunner|
-        2.8  ............................... |VtrDetachRunner|
-        2.9  ............................... |VtrReattachRunner|
-        2.10 ............................... |VtrClearRunner|
-        2.11 ............................... |VtrFlushCommand|
-        2.12 ............................... |VtrSendCtrlD|
-        2.13 ............................... |VtrSendFile|
+        2.6  ............................... |VtrSelectRunner|
+        2.7  ............................... |VtrResizeRunner|
+        2.8  ............................... |VtrReorientRunner|
+        2.9  ............................... |VtrDetachRunner|
+        2.10  ............................... |VtrReattachRunner|
+        2.11 ............................... |VtrClearRunner|
+        2.12 ............................... |VtrFlushCommand|
+        2.13 ............................... |VtrSendCtrlD|
+        2.14 ............................... |VtrSendFile|
       3. Configuration ................... |VTR-Configuration|
         3.1 ................................ |VtrPercentage|
         3.2 ................................ |VtrOrientation|
@@ -142,7 +143,7 @@ Kill the tmux runner pane. this pane will kill either the local or detached
 runner pane. this command does nothing if there is currently not a runner
 pane.
 
-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
                                                                *VtrFocusRunner*
 2.5 VtrFocusRunner~
 
@@ -151,8 +152,16 @@ be created if one does not exist and a detached pane will be restored as
 needed.
 
 ------------------------------------------------------------------------------
+                                                               *VtrSelectRunner*
+2.6 VtrSelectRunner~
+
+Move the cursor to the runner to interact directly with it. A new runner will
+be created if one does not exist and a detached pane will be restored as
+needed.
+
+------------------------------------------------------------------------------
                                                               *VtrResizeRunner*
-2.6 VtrResizeRunner~
+2.7 VtrResizeRunner~
 
 Prompt for a new percentage then resize the runner pane to that percentage.
 This command will update the |VtrPercentage| setting for the current Vim
@@ -162,7 +171,7 @@ with the |VtrClearOnResize| setting.
 
 ------------------------------------------------------------------------------
                                                             *VtrReorientRunner*
-2.7 VtrReorientRunner~
+2.8 VtrReorientRunner~
 
 Switch the runner pane from its current orientation to the alternate
 orientation (horizontal or vertical). The |VtrPercentage| will be maintained
@@ -172,7 +181,7 @@ setting.
 
 ------------------------------------------------------------------------------
                                                               *VtrDetachRunner*
-2.8 VtrDetachRunner~
+2.9 VtrDetachRunner~
 
 Detach the runner pane to its own window while keeping the cursor focus on the
 Vim window. This command is useful if there are details in the runner pane or
@@ -185,7 +194,7 @@ needed again. The runner can later be restored with any of |VtrReattachRunner|,
 
 ------------------------------------------------------------------------------
                                                             *VtrReattachRunner*
-2.9 VtrReattachRunner~
+2.10 VtrReattachRunner~
 
 Reattach the runner pane. This command assumes that the runner has previously
 been dismissed using the |VtrDetachRunner| command. The pane will be restored
@@ -195,7 +204,7 @@ behavior can be disabled using the |VtrClearOnReattach| setting.
 
 ------------------------------------------------------------------------------
                                                                *VtrClearRunner*
-2.10 VtrClearRunner~
+2.11 VtrClearRunner~
 
 Send the key sequence defined by the |VtrClearSequence| setting to the runner.
 By default this will clear any unfinished commands at the shell prompt and
@@ -203,14 +212,14 @@ move the prompt up to hide any previous command output.
 
 ------------------------------------------------------------------------------
                                                               *VtrFlushCommand*
-2.11 VtrFlushCommand~
+2.12 VtrFlushCommand~
 
 Flush the previous run command variable. After running this command, the next
 run of |VtrSendCommandToRunner| will again prompt for the command to run.
 
 ------------------------------------------------------------------------------
                                                                  *VtrSendCtrlD*
-2.12 VtrSendCtrlD~
+2.13 VtrSendCtrlD~
 
 Send Ctrl-D key sequence to the runner without resetting the current command.
 This is useful if you are repeatedly running a script in the debugger and
@@ -218,7 +227,7 @@ regularly need to kill the repl.
 
 ------------------------------------------------------------------------------
                                                                   *VtrSendFile*
-2.13 VtrSendFile~
+2.14 VtrSendFile~
 
 Send a command to execute the current file as a script. The command will be
 crafted based on the filetype of the current buffer, e.g. for a file "foo.rb"
