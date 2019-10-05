@@ -151,6 +151,11 @@ function! s:FocusRunnerPane()
     call s:SendTmuxCommand("resize-pane -Z")
 endfunction
 
+function! s:SelectRunnerPane()
+    if !s:ValidRunnerPaneSet() | return | endif
+    call s:FocusTmuxPane(s:runner_pane)
+endfunction
+
 function! s:Strip(string)
     return substitute(a:string, '^\s*\(.\{-}\)\s*\n\?$', '\1', '')
 endfunction
@@ -472,6 +477,7 @@ function! s:DefineCommands()
     command! -nargs=? VtrOpenRunner call s:EnsureRunnerPane(<args>)
     command! VtrKillRunner call s:KillRunnerPane()
     command! VtrFocusRunner call s:FocusRunnerPane()
+    command! VtrSelectRunner call s:SelectRunnerPane()
     command! VtrReorientRunner call s:ReorientRunner()
     command! VtrDetachRunner call s:DetachRunnerPane()
     command! VtrReattachRunner call s:ReattachPane()
@@ -491,6 +497,7 @@ function! s:DefineKeymaps()
         nnoremap <leader>or :VtrOpenRunner<cr>
         nnoremap <leader>kr :VtrKillRunner<cr>
         nnoremap <leader>fr :VtrFocusRunner<cr>
+        nnoremap <leader>sr :VtrSelectRunner<cr>
         nnoremap <leader>dr :VtrDetachRunner<cr>
         nnoremap <leader>cr :VtrClearRunner<cr>
         nnoremap <leader>fc :VtrFlushCommand<cr>
