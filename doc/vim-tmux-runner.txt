@@ -1,4 +1,4 @@
-*vim-tmux-runner.txt*	      For Vim version 7.3	      Last change: 2019 Oct 05
+*vim-tmux-runner.txt*	      For Vim version 7.3	      Last change: 2019 Oct 04
 
                             Vim Tmux Runner
                     Vim and tmux, sittin' in a tree...
