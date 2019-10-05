@@ -17,7 +17,7 @@ CONTENTS                                                        *vtr-contents*
         2.7  ............................... |VtrResizeRunner|
         2.8  ............................... |VtrReorientRunner|
         2.9  ............................... |VtrDetachRunner|
-        2.10  ............................... |VtrReattachRunner|
+        2.10  .............................. |VtrReattachRunner|
         2.11 ............................... |VtrClearRunner|
         2.12 ............................... |VtrFlushCommand|
         2.13 ............................... |VtrSendCtrlD|
