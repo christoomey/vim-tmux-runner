@@ -145,10 +145,12 @@ function! s:RunnerPaneDimensions()
     endfor
 endfunction
 
-function! s:FocusRunnerPane()
+function! s:FocusRunnerPane(should_zoom)
     if !s:ValidRunnerPaneSet() | return | endif
     call s:FocusTmuxPane(s:runner_pane)
-    call s:SendTmuxCommand("resize-pane -Z")
+    if a:should_zoom
+        call s:SendTmuxCommand("resize-pane -Z")
+    endif
 endfunction
 
 function! s:Strip(string)
@@ -471,7 +473,7 @@ function! s:DefineCommands()
     command! -bang VtrSendFile call s:SendFileViaVtr(<bang>0)
     command! -nargs=? VtrOpenRunner call s:EnsureRunnerPane(<args>)
     command! VtrKillRunner call s:KillRunnerPane()
-    command! VtrFocusRunner call s:FocusRunnerPane()
+    command! -bang VtrFocusRunner call s:FocusRunnerPane(<bang>!0)
     command! VtrReorientRunner call s:ReorientRunner()
     command! VtrDetachRunner call s:DetachRunnerPane()
     command! VtrReattachRunner call s:ReattachPane()

@@ -146,9 +146,10 @@ pane.
                                                                *VtrFocusRunner*
 2.5 VtrFocusRunner~
 
-Move the cursor to the runner to interact directly with it. A new runner will
-be created if one does not exist and a detached pane will be restored as
-needed.
+Move the cursor to the runner to interact directly with it and zooms the
+pane. A new runner will be created if one does not exist and a detached
+pane will be restored as needed. To not zoom the runner pane, add a bang:
+VtrFocusRunner!.
 
 ------------------------------------------------------------------------------
                                                               *VtrResizeRunner*
