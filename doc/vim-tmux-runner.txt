@@ -335,15 +335,15 @@ The following normal mode maps are provided when g:VtrUseVtrMaps is set to 1:
 
         Mapping      |   Command
         -----------------------------
-        <leader>rr   |   VtrResizeRunner<cr>
+        <leader>va   |   VtrAttachToPane<cr>
         <leader>ror  |   VtrReorientRunner<cr>
         <leader>sc   |   VtrSendCommandToRunner<cr>
+        <leader>sf   |   VtrSendFile<cr>
         <leader>sl   |   VtrSendLinesToRunner<cr>
         <leader>or   |   VtrOpenRunner<cr>
         <leader>kr   |   VtrKillRunner<cr>
         <leader>fr   |   VtrFocusRunner<cr>
         <leader>dr   |   VtrDetachRunner<cr>
-        <leader>ar   |   VtrReattachRunner<cr>
         <leader>cr   |   VtrClearRunner<cr>
         <leader>fc   |   VtrFlushCommand<cr>
 
