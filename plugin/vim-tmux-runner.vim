@@ -488,7 +488,7 @@ function! s:DefineCommands()
     command! VtrFlushCommand call s:FlushCommand()
     command! VtrSendCtrlD call s:SendCtrlD()
     command! VtrSendCtrlC call s:SendCtrlC()
-    command! VtrAttachToPane call s:PromptForRunnerToAttach()
+    command! -bang -nargs=? -bar VtrAttachToPane call s:AttachToPane(<f-args>)
     command! -nargs=1 VtrSendKeysRaw call s:SendKeysRaw(<q-args>)
 endfunction
 
