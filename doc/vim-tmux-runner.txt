@@ -1,4 +1,4 @@
-*vim-tmux-runner.txt*	      For Vim version 7.3	      Last change: 2012 Nov 25
+*vim-tmux-runner.txt*	      For Vim version 7.3	      Last change: 2020 May 29
 
                             Vim Tmux Runner
                     Vim and tmux, sittin' in a tree...
@@ -20,7 +20,9 @@ CONTENTS                                                        *vtr-contents*
         2.10 ............................... |VtrClearRunner|
         2.11 ............................... |VtrFlushCommand|
         2.12 ............................... |VtrSendCtrlD|
-        2.13 ............................... |VtrSendFile|
+        2.13 ............................... |VtrSendCtrlC|
+        2.14 ............................... |VtrSendKeysRaw|
+        2.15 ............................... |VtrSendFile|
       3. Configuration ................... |VTR-Configuration|
         3.1 ................................ |VtrPercentage|
         3.2 ................................ |VtrOrientation|
@@ -218,8 +220,23 @@ This is useful if you are repeatedly running a script in the debugger and
 regularly need to kill the repl.
 
 ------------------------------------------------------------------------------
+                                                                 *VtrSendCtrlC*
+2.13 VtrSendCtrlC~
+
+Send Ctrl-C key sequence to the runner without resetting the current command.
+This is useful if you are repeatedly running a script in the debugger and
+regularly need to interrupt the process.
+
+------------------------------------------------------------------------------
+                                                               *VtrSendKeysRaw*
+2.14 VtrSendKeysRaw~
+
+Send a key sequence to the runner. |VtrSendCtrlD| and |VtrSendCtrlC| wrap this
+to send Ctrl-D and Ctrl-C to the runner.
+
+------------------------------------------------------------------------------
                                                                   *VtrSendFile*
-2.13 VtrSendFile~
+2.15 VtrSendFile~
 
 Send a command to execute the current file as a script. The command will be
 crafted based on the filetype of the current buffer, e.g. for a file "foo.rb"
