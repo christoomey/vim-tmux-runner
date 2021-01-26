@@ -432,10 +432,11 @@ endfunction
 function! s:SendTextToRunner(lines)
     if !s:ValidRunnerPaneSet() | return | endif
     let prepared = s:PrepareLines(a:lines)
-    let joined_lines = join(prepared, "\r") . "\r"
     let send_keys_cmd = s:TargetedTmuxCommand("send-keys", s:runner_pane)
-    let targeted_cmd = send_keys_cmd . ' ' . shellescape(joined_lines)
-    call s:SendTmuxCommand(targeted_cmd)
+    for line in prepared
+      let targeted_cmd = send_keys_cmd . ' ' . shellescape(line . "\r")
+      call s:SendTmuxCommand(targeted_cmd)
+    endfor
 endfunction
 
 function! s:SendFileViaVtr(ensure_pane)
