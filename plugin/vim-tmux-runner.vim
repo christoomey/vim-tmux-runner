@@ -135,9 +135,8 @@ function! s:TmuxPanesByName()
     let lines = split(panes, '\n')
     let result = {}
     for line in lines
-        echo line
-        let matches = matchlist(line, "\vname:(.*),id:(.*)")
-        if len(matches) == 3
+        let matches = matchlist(line, '\vname:(.*),id:(.*)')
+        if len(matches) >= 3
             let name = matches[1]
             let id = matches[2]
             let result[name] = id
@@ -277,7 +276,7 @@ endfunction
 function! s:PaneNumberForName(name)
   let mapped = s:TmuxPanesByName()
   if has_key(mapped, a:name)
-      return mapped[name]
+      return mapped[a:name]
   endif
   return -1
 endfunction
@@ -427,7 +426,7 @@ function! s:EnsureRunnerPane(...)
         return
     endif
 
-    if g:VtrAutomaticReattachByName
+    if g:VtrAutomaticReattachByName == 1
         let found = s:PaneNumberForName(g:VtrCreatedRunnerPaneName)
         if found >= 0
             call s:AttachToSpecifiedPane(found)
@@ -441,7 +440,7 @@ function! s:EnsureRunnerPane(...)
         call s:CreateRunnerPane()
     endif
 
-    endfunction
+endfunction
 
 function! s:SendLinesToRunner(ensure_pane) range
     if a:ensure_pane | call s:EnsureRunnerPane() | endif
@@ -564,11 +563,6 @@ function! s:InitializeVariables()
     call s:InitVariable("g:VtrAppendNewline", 0)
     let s:vtr_percentage = g:VtrPercentage
     let s:vtr_orientation = g:VtrOrientation
-
-    if !exists('g:VtrAutomaticReattachByName')
-        let g:VtrAutomaticReattachByName = 0
-    endif
-
 endfunction
 
 call s:InitializeVariables()
