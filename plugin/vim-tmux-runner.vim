@@ -24,6 +24,7 @@ function! s:CreateRunnerPane(...)
     let s:vim_pane = s:ActivePaneIndex()
     let cmd = join(["split-window -p", s:vtr_percentage, "-".s:vtr_orientation])
     call s:SendTmuxCommand(cmd)
+    call s:SendTmuxCommand('select-pane -T '.g:VtrCreatedRunnerPaneName)
     let s:runner_pane = s:ActivePaneIndex()
     call s:FocusVimPane()
     if g:VtrGitCdUpOnOpen
@@ -127,6 +128,23 @@ endfunction
 function! s:TmuxPanes()
     let panes = s:SendTmuxCommand("list-panes")
     return split(panes, '\n')
+endfunction
+
+function! s:TmuxPanesByName()
+    let panes = s:SendTmuxCommand("list-panes -F 'name:#T,id:#P'")
+    let lines = split(panes, '\n')
+    let result = {}
+    for line in lines
+        echo line
+        let matches = matchlist(line, "\vname:(.*),id:(.*)")
+        if len(matches) == 3
+            let name = matches[1]
+            let id = matches[2]
+            let result[name] = id
+        endif
+    endfor
+
+    return result
 endfunction
 
 function! s:FocusTmuxPane(pane_number)
@@ -254,6 +272,14 @@ endfunction
 function! s:PaneIndices()
   let index_slicer = 'str2nr(substitute(v:val, "\\v(\\d+):.*", "\\1", ""))'
   return map(s:TmuxPanes(), index_slicer)
+endfunction
+
+function! s:PaneNumberForName(name)
+  let mapped = s:TmuxPanesByName()
+  if has_key(mapped, a:name)
+      return mapped[name]
+  endif
+  return -1
 endfunction
 
 function! s:AvailableRunnerPaneIndices()
@@ -399,14 +425,24 @@ function! s:EnsureRunnerPane(...)
         call s:ReattachPane()
     elseif exists('s:runner_pane')
         return
-    else
-        if exists('a:1')
-            call s:CreateRunnerPane(a:1)
-        else
-            call s:CreateRunnerPane()
+    endif
+
+    if g:VtrAutomaticReattachByName
+        let found = s:PaneNumberForName(g:VtrCreatedRunnerPaneName)
+        if found >= 0
+            call s:AttachToSpecifiedPane(found)
+            return
+
         endif
     endif
-endfunction
+
+    if exists('a:1')
+        call s:CreateRunnerPane(a:1)
+    else
+        call s:CreateRunnerPane()
+    endif
+
+    endfunction
 
 function! s:SendLinesToRunner(ensure_pane) range
     if a:ensure_pane | call s:EnsureRunnerPane() | endif
@@ -520,12 +556,14 @@ function! s:InitializeVariables()
     call s:InitVariable("g:VtrUseVtrMaps", 0)
     call s:InitVariable("g:VtrClearOnReorient", 1)
     call s:InitVariable("g:VtrClearOnReattach", 1)
-    call s:InitVariable("g:VtrDetachedName", "VTR_Pane")
+    call s:InitVariable("g:VtrDetachedName", "VTR_Detached_Pane")
+    call s:InitVariable("g:VtrCreatedRunnerPaneName", "VTR_Created_Pane")
     call s:InitVariable("g:VtrClearSequence", "")
     call s:InitVariable("g:VtrDisplayPaneNumbers", 1)
     call s:InitVariable("g:VtrStripLeadingWhitespace", 1)
     call s:InitVariable("g:VtrClearEmptyLines", 1)
     call s:InitVariable("g:VtrAppendNewline", 0)
+    call s:InitVariable("g:VtrAutomaticReattachByName", 0)
     let s:vtr_percentage = g:VtrPercentage
     let s:vtr_orientation = g:VtrOrientation
 endfunction
