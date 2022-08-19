@@ -432,7 +432,6 @@ function! s:EnsureRunnerPane(...)
         if found >= 0
             call s:AttachToSpecifiedPane(found)
             return
-
         endif
     endif
 
