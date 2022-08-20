@@ -422,16 +422,14 @@ endfunction
 function! s:EnsureRunnerPane(...)
     if exists('s:detached_window')
         call s:ReattachPane()
-    elseif exists('s:runner_pane')
-        return
-    endif
-
-    if g:VtrAutomaticReattachByName == 1
+    elseif g:VtrAutomaticReattachByName == 1
         let found = s:PaneNumberForName(g:VtrCreatedRunnerPaneName)
         if found >= 0
             call s:AttachToSpecifiedPane(found)
             return
         endif
+    elseif exists('s:runner_pane')
+        return
     endif
 
     if exists('a:1')
