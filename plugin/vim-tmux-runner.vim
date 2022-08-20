@@ -130,6 +130,10 @@ function! s:TmuxPanes()
     return split(panes, '\n')
 endfunction
 
+" builds a returns of map of { <pane_name>: <pane id> }
+" note: if two panes have the same name there will only be
+" one entry for the last pane with that id returned by
+" list-panes
 function! s:TmuxPanesByName()
     let panes = s:SendTmuxCommand("list-panes -F 'name:#T,id:#P'")
     let lines = split(panes, '\n')
@@ -295,9 +299,9 @@ endfunction
 
 function! s:AttachToPane(...)
   if exists("a:1") && a:1 != ""
-    call s:AttachToSpecifiedPane(a:1)
+    call s:AttachToSpecifiedPane(a:1, 1)
   elseif s:PaneCount() == 2
-    call s:AttachToSpecifiedPane(s:AltPane())
+    call s:AttachToSpecifiedPane(s:AltPane(), 1)
   else
     call s:PromptForPaneToAttach()
   endif
@@ -309,7 +313,7 @@ function! s:PromptForPaneToAttach()
   endif
   echohl String | let desired_pane = input('Pane #: ') | echohl None
   if desired_pane != ''
-    call s:AttachToSpecifiedPane(desired_pane)
+    call s:AttachToSpecifiedPane(desired_pane, 1)
   else
     call s:EchoError("No pane specified. Cancelling.")
   endif
@@ -322,13 +326,15 @@ function! s:CurrentMajorOrientation()
   return orientation_map[outermost_orientation]
 endfunction
 
-function! s:AttachToSpecifiedPane(desired_pane)
+function! s:AttachToSpecifiedPane(desired_pane, should_notify)
   let desired_pane = str2nr(a:desired_pane)
   if s:ValidRunnerPaneNumber(desired_pane)
     let s:runner_pane = desired_pane
     let s:vim_pane = s:ActivePaneIndex()
     let s:vtr_orientation = s:CurrentMajorOrientation()
-    echohl String | echo "\rRunner pane set to: " . desired_pane | echohl None
+    if a:should_notify
+        echohl String | echo "\rRunner pane set to: " . desired_pane | echohl None
+    endif
   else
     call s:EchoError("Invalid pane number: " . desired_pane)
   endif
@@ -425,7 +431,7 @@ function! s:EnsureRunnerPane(...)
     elseif g:VtrAutomaticReattachByName == 1
         let found = s:PaneNumberForName(g:VtrCreatedRunnerPaneName)
         if found >= 0
-            call s:AttachToSpecifiedPane(found)
+            call s:AttachToSpecifiedPane(found, 0)
             return
         endif
     elseif exists('s:runner_pane')
