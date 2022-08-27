@@ -24,6 +24,7 @@ function! s:CreateRunnerPane(...)
     let s:vim_pane = s:ActivePaneIndex()
     let cmd = join(["split-window -p", s:vtr_percentage, "-".s:vtr_orientation])
     call s:SendTmuxCommand(cmd)
+    call s:SendTmuxCommand('select-pane -T '.g:VtrCreatedRunnerPaneName)
     let s:runner_pane = s:ActivePaneIndex()
     call s:FocusVimPane()
     if g:VtrGitCdUpOnOpen
@@ -127,6 +128,26 @@ endfunction
 function! s:TmuxPanes()
     let panes = s:SendTmuxCommand("list-panes")
     return split(panes, '\n')
+endfunction
+
+" builds a returns of map of { <pane_name>: <pane id> }
+" note: if two panes have the same name there will only be
+" one entry for the last pane with that id returned by
+" list-panes
+function! s:TmuxPanesByName()
+    let panes = s:SendTmuxCommand("list-panes -F 'name:#T,id:#P'")
+    let lines = split(panes, '\n')
+    let result = {}
+    for line in lines
+        let matches = matchlist(line, '\vname:(.*),id:(.*)')
+        if len(matches) >= 3
+            let name = matches[1]
+            let id = matches[2]
+            let result[name] = id
+        endif
+    endfor
+
+    return result
 endfunction
 
 function! s:FocusTmuxPane(pane_number)
@@ -256,6 +277,14 @@ function! s:PaneIndices()
   return map(s:TmuxPanes(), index_slicer)
 endfunction
 
+function! s:PaneNumberForName(name)
+  let mapped = s:TmuxPanesByName()
+  if has_key(mapped, a:name)
+      return mapped[a:name]
+  endif
+  return -1
+endfunction
+
 function! s:AvailableRunnerPaneIndices()
   return filter(s:PaneIndices(), "v:val != " . s:ActivePaneIndex())
 endfunction
@@ -270,9 +299,9 @@ endfunction
 
 function! s:AttachToPane(...)
   if exists("a:1") && a:1 != ""
-    call s:AttachToSpecifiedPane(a:1)
+    call s:AttachToSpecifiedPane(a:1, 1)
   elseif s:PaneCount() == 2
-    call s:AttachToSpecifiedPane(s:AltPane())
+    call s:AttachToSpecifiedPane(s:AltPane(), 1)
   else
     call s:PromptForPaneToAttach()
   endif
@@ -284,7 +313,7 @@ function! s:PromptForPaneToAttach()
   endif
   echohl String | let desired_pane = input('Pane #: ') | echohl None
   if desired_pane != ''
-    call s:AttachToSpecifiedPane(desired_pane)
+    call s:AttachToSpecifiedPane(desired_pane, 1)
   else
     call s:EchoError("No pane specified. Cancelling.")
   endif
@@ -297,13 +326,15 @@ function! s:CurrentMajorOrientation()
   return orientation_map[outermost_orientation]
 endfunction
 
-function! s:AttachToSpecifiedPane(desired_pane)
+function! s:AttachToSpecifiedPane(desired_pane, should_notify)
   let desired_pane = str2nr(a:desired_pane)
   if s:ValidRunnerPaneNumber(desired_pane)
     let s:runner_pane = desired_pane
     let s:vim_pane = s:ActivePaneIndex()
     let s:vtr_orientation = s:CurrentMajorOrientation()
-    echohl String | echo "\rRunner pane set to: " . desired_pane | echohl None
+    if a:should_notify
+        echohl String | echo "\rRunner pane set to: " . desired_pane | echohl None
+    endif
   else
     call s:EchoError("Invalid pane number: " . desired_pane)
   endif
@@ -397,15 +428,22 @@ endfunction
 function! s:EnsureRunnerPane(...)
     if exists('s:detached_window')
         call s:ReattachPane()
+    elseif g:VtrAutomaticReattachByName == 1
+        let found = s:PaneNumberForName(g:VtrCreatedRunnerPaneName)
+        if found >= 0
+            call s:AttachToSpecifiedPane(found, 0)
+            return
+        endif
     elseif exists('s:runner_pane')
         return
-    else
-        if exists('a:1')
-            call s:CreateRunnerPane(a:1)
-        else
-            call s:CreateRunnerPane()
-        endif
     endif
+
+    if exists('a:1')
+        call s:CreateRunnerPane(a:1)
+    else
+        call s:CreateRunnerPane()
+    endif
+
 endfunction
 
 function! s:SendLinesToRunner(ensure_pane) range
@@ -520,7 +558,8 @@ function! s:InitializeVariables()
     call s:InitVariable("g:VtrUseVtrMaps", 0)
     call s:InitVariable("g:VtrClearOnReorient", 1)
     call s:InitVariable("g:VtrClearOnReattach", 1)
-    call s:InitVariable("g:VtrDetachedName", "VTR_Pane")
+    call s:InitVariable("g:VtrDetachedName", "VTR_Detached_Pane")
+    call s:InitVariable("g:VtrCreatedRunnerPaneName", "VTR_Created_Pane")
     call s:InitVariable("g:VtrClearSequence", "")
     call s:InitVariable("g:VtrDisplayPaneNumbers", 1)
     call s:InitVariable("g:VtrStripLeadingWhitespace", 1)

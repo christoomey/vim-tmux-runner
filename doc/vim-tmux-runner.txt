@@ -39,6 +39,8 @@ CONTENTS                                                        *vtr-contents*
         3.12 ............................... |VtrStripLeadingWhitespace|
         3.13 ............................... |VtrClearEmptyLines|
         3.14 ............................... |VtrAppendNewline|
+        3.15 ............................... |VtrCreatedRunnerPaneName|
+        3.16 ............................... |VtrAutomaticReattachByName|
 
 ==============================================================================
 ABOUT (1)                                                           *VTR-About*
@@ -480,6 +482,32 @@ line might be needed to close the preceding context. To enable appending a new
 line to any multi line send, use the following setting.
 
   let g:VtrAppendNewline = 1
+
+Default: 0
+
+------------------------------------------------------------------------------
+                                                     *VtrCreatedRunnerPaneName*
+
+3.15 g:VtrCreatedRunnerPaneName
+
+When runner panes are created this name will be set on them using:
+"select-pane -T g:VtrCreatedRunnerPaneName"
+
+  let g:VtrCreatedRunnerPaneName = "the name you want"
+
+Default: VTR_Created_Pane
+
+------------------------------------------------------------------------------
+                                                   *VtrAutomaticReattachByName*
+
+3.16 g:VtrAutomaticReattachByName
+
+With this option a search for a runner pane with the name stored in
+g:VtrCreatedRunnerPaneName will be performed and the command will be sent to
+that pane if it exists before any new runner panes are created. defined by
+g:VtrCreatedRunnerPaneName.
+
+  let g:VtrAutomaticReattachByName = 1
 
 Default: 0
 
