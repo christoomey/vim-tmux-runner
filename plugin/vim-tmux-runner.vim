@@ -565,6 +565,7 @@ function! s:InitializeVariables()
     call s:InitVariable("g:VtrStripLeadingWhitespace", 1)
     call s:InitVariable("g:VtrClearEmptyLines", 1)
     call s:InitVariable("g:VtrAppendNewline", 0)
+    call s:InitVariable("g:VtrAutomaticReattachByName", 0)
     let s:vtr_percentage = g:VtrPercentage
     let s:vtr_orientation = g:VtrOrientation
 endfunction
