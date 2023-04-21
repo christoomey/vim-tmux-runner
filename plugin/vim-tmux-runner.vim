@@ -431,6 +431,71 @@ function! s:SendCommandToRunner(ensure_pane, ...)
     call s:SendKeys(s:user_command)
 endfunction
 
+xnoremap <silent> <Plug>VtrSend :<C-U>call <SID>vtr_send(visualmode(),visualmode() ==# 'V' ? 1 : 0)<CR>
+nnoremap <silent> <Plug>VtrSend :<C-U>set opfunc=<SID>vtr_send<CR>g@
+nnoremap <silent> <Plug>VtrSendLine :<C-U>set opfunc=<SID>vtr_send<Bar>exe 'norm! 'v:count1.'g@_'<CR>
+
+nmap <leader>\ <Plug>VtrSend
+xmap <leader>\ <Plug>VtrSend
+nmap <leader>\\ <Plug>VtrSendLine
+
+" if !hasmapto('<Plug>VtrSend', 'n') || maparg('cp', 'n') ==# ''
+"   nmap <leader>\ <Plug>VtrSend
+" endif
+
+" if !hasmapto('<Plug>VtrSend', 'v') || maparg('cp', 'v') ==# ''
+"   xmap <leader>\ <Plug>VtrSend
+" endif
+
+" if !hasmapto('<Plug>VtrSendLine', 'n') || maparg('cP', 'n') ==# ''
+"   nmap <leader>\\ <Plug>VtrSendLine
+" endif
+
+let s:blockwise = 'blockwise visual'
+let s:visual = 'visual'
+let s:motion = 'motion'
+let s:linewise = 'linewise'
+
+function! s:vtr_send(type, ...) abort
+  call s:EnsureRunnerPane()
+  if !s:ValidRunnerPaneSet() | return | endif
+  call s:SendTmuxCopyModeExit()
+  if g:VtrClearBeforeSend | call s:SendClearSequence() | endif
+  let mode = <SID>resolve_mode(a:type, a:0)
+  let unnamed = @@
+  echom mode
+  if mode == s:linewise
+    let lines = { 'start': line("'["), 'end': line("']") }
+    silent exe lines.start . "," . lines.end . "y"
+  elseif mode == s:visual || mode == s:blockwise
+    silent exe "normal! `<" . a:type . "`>y"
+  else
+    silent exe "normal! `[v`]y"
+  endif
+  let command = getreg('@')
+  let initial_text = getreg('@')
+  if initial_text[len(initial_text) - 1] == "\n"
+    let text_to_send = initial_text
+  else
+    let text_to_send = initial_text . "\n"
+  end
+  echom text_to_send
+  call s:SendTmuxCommand("set-buffer " . shellescape(text_to_send))
+  let @@ = unnamed
+  call s:SendTmuxCommand(s:TargetedTmuxCommand('paste-buffer', s:runner_pane))
+endfunction
+
+function! s:resolve_mode(type, arg)
+  let visual_mode = a:arg != 0
+  if visual_mode
+    return (a:type == '') ?  s:blockwise : s:visual
+  elseif a:type == 'line'
+    return s:linewise
+  else
+    return s:motion
+  endif
+endfunction
+
 function! s:EnsureRunnerPane(...)
     if exists('s:detached_window')
         call s:ReattachPane()
