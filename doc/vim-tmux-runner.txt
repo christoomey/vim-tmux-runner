@@ -23,6 +23,7 @@ CONTENTS                                                        *vtr-contents*
         2.13 ............................... |VtrSendCtrlC|
         2.14 ............................... |VtrSendKeysRaw|
         2.15 ............................... |VtrSendFile|
+        2.16 ............................... |VtrUnsetRunnerPane|
       3. Configuration ................... |VTR-Configuration|
         3.1 ................................ |VtrPercentage|
         3.2 ................................ |VtrOrientation|
@@ -258,6 +259,15 @@ Any settings in your g:vtr_filetype_runner_overrides will take precedence
 over the default values.
 
 This command expects a runner to be attached. Add ! to force a runner.
+
+------------------------------------------------------------------------------
+                                                           *VtrUnsetRunnerPane*
+2.16 VtrUnsetRunnerPane~
+
+This command will unset the "runner pane" allowing you to open a new pane. Most
+commands will check for the runner pane before running and thus you may hit
+"Runner pane setting (1) is invalid..." if you've closed the runner pane.
+
 
 ==============================================================================
 CONFIGURATION (3)                                           *VTR-Configuration*

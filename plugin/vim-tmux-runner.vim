@@ -48,7 +48,7 @@ function! s:ValidRunnerPaneSet()
         return 0
     endif
     if !s:ValidRunnerPaneNumber(s:runner_pane)
-        call s:EchoError("Runner pane setting (" . s:runner_pane . ") is invalid. Please reattach.")
+        call s:EchoError("Runner pane setting (" . s:runner_pane . ") is invalid. Please reattach or run VtrUnsetRunnerPane.")
         return 0
     endif
     return 1
@@ -91,8 +91,14 @@ function! s:KillLocalRunner()
     if s:ValidRunnerPaneSet()
       let targeted_cmd = s:TargetedTmuxCommand("kill-pane", s:runner_pane)
       call s:SendTmuxCommand(targeted_cmd)
-      unlet s:runner_pane
+      call s:UnsetRunnerPane()
     endif
+endfunction
+
+function! s:UnsetRunnerPane()
+  if exists("s:runner_pane")
+    unlet s:runner_pane
+  endif
 endfunction
 
 function! s:WindowMap()
@@ -254,7 +260,7 @@ function! s:BreakRunnerPaneToTempWindow()
     call s:SendTmuxCommand(full_command)
     let s:detached_window = s:LastWindowNumber()
     let s:vim_pane = s:ActivePaneIndex()
-    unlet s:runner_pane
+    call s:UnsetRunnerPane()
 endfunction
 
 function! s:RunnerDimensionSpec()
@@ -527,6 +533,7 @@ function! s:DefineCommands()
     command! VtrFlushCommand call s:FlushCommand()
     command! VtrSendCtrlD call s:SendCtrlD()
     command! VtrSendCtrlC call s:SendCtrlC()
+    command! VtrUnsetRunnerPane call s:UnsetRunnerPane()
     command! -bang -nargs=? -bar VtrAttachToPane call s:AttachToPane(<f-args>)
     command! -nargs=1 VtrSendKeysRaw call s:SendKeysRaw(<q-args>)
 endfunction
