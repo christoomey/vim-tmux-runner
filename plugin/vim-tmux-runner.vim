@@ -351,12 +351,12 @@ function! s:EchoError(message)
 endfunction
 
 function! s:DesiredPaneExists(desired_pane)
-  return count(s:PaneIndices(), a:desired_pane) == 0
+  return count(s:PaneIndices(), a:desired_pane) != 0
 endfunction
 
 function! s:ValidRunnerPaneNumber(desired_pane)
   if a:desired_pane == s:ActivePaneIndex() | return 0 | endif
-  if s:DesiredPaneExists(a:desired_pane) | return 0 | endif
+  if !s:DesiredPaneExists(a:desired_pane) | return 0 | endif
   return 1
 endfunction
 
