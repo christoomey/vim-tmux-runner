@@ -463,7 +463,6 @@ function! s:vtr_send(type, ...) abort
   if g:VtrClearBeforeSend | call s:SendClearSequence() | endif
   let mode = <SID>resolve_mode(a:type, a:0)
   let unnamed = @@
-  echom mode
   if mode == s:linewise
     let lines = { 'start': line("'["), 'end': line("']") }
     silent exe lines.start . "," . lines.end . "y"
@@ -479,7 +478,6 @@ function! s:vtr_send(type, ...) abort
   else
     let text_to_send = initial_text . "\n"
   end
-  echom text_to_send
   call s:SendTmuxCommand("set-buffer " . shellescape(text_to_send))
   let @@ = unnamed
   call s:SendTmuxCommand(s:TargetedTmuxCommand('paste-buffer', s:runner_pane))
