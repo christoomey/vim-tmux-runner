@@ -22,7 +22,7 @@ function! s:CreateRunnerPane(...)
         let g:VtrInitialCommand = s:DictFetch(a:1, 'cmd', g:VtrInitialCommand)
     endif
     let s:vim_pane = s:ActivePaneIndex()
-    let cmd = join(["split-window -p", s:vtr_percentage, "-".s:vtr_orientation])
+    let cmd = join(["split-window -l", s:vtr_percentage, "-".s:vtr_orientation])
     call s:SendTmuxCommand(cmd)
     call s:SendTmuxCommand('select-pane -T '.g:VtrCreatedRunnerPaneName)
     let s:runner_pane = s:ActivePaneIndex()
