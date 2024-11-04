@@ -15,6 +15,13 @@ function! s:DictFetch(dict, key, default)
     endif
 endfunction
 
+function! s:GetSplitWindowCommand() abort
+    let tmux_version = str2float(substitute(system('tmux -V'), 'tmux \([0-9]\+\.[0-9]\+\).*', '\1', ''))
+    " NOTE: -p deprecated as of tmux 3.4
+    let flag = (tmux_version < 3.4 ? '-p' : '-l')
+    return join(["split-window", flag, s:vtr_percentage, "-".s:vtr_orientation])
+endfunction
+
 function! s:CreateRunnerPane(...)
     if exists("a:1")
         let s:vtr_orientation = s:DictFetch(a:1, 'orientation', s:vtr_orientation)
@@ -22,7 +29,7 @@ function! s:CreateRunnerPane(...)
         let g:VtrInitialCommand = s:DictFetch(a:1, 'cmd', g:VtrInitialCommand)
     endif
     let s:vim_pane = s:ActivePaneIndex()
-    let cmd = join(["split-window -p", s:vtr_percentage, "-".s:vtr_orientation])
+    let cmd = s:GetSplitWindowCommand()
     call s:SendTmuxCommand(cmd)
     call s:SendTmuxCommand('select-pane -T '.g:VtrCreatedRunnerPaneName)
     let s:runner_pane = s:ActivePaneIndex()
